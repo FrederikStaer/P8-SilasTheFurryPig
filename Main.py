@@ -117,16 +117,16 @@ feature_extractor = Alexnet_FE(pretrained_alexnet)
 for task_number in range(1, opt.no_of_tasks+1):
 	
 	print ("Task Number {}".format(task_number))
-	data_path = os.getcwd() + "/Data"
-	encoder_path = os.getcwd() + "/models/autoencoders"
+	data_path = os.path.join(os.getcwd(), "Data")
+	encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
 	#model_path = os.getcwd() + "/models/trained_models"
 
-	path_task = data_path + "/Task_" + str(task_number)
+	path_task = os.path.join(data_path, "Task_" + str(task_number))
 	
 	if (task_number <= opt.dataset_boundaries[0]):
-		image_folder = datasets.ImageFolder(path_task + "/" + 'train', transform = data_transforms_tin['train'])
+		image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
 	else:
-		image_folder = datasets.ImageFolder(path_task + "/" + 'train', transform = data_transforms_mnist['train'])	
+		image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_mnist['train'])	
 	
 	dset_size = len(image_folder)
 
@@ -135,7 +135,7 @@ for task_number in range(1, opt.no_of_tasks+1):
 	dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size,
 													shuffle=True, num_workers=4)
 
-	mypath = encoder_path + "/autoencoder_" + str(task_number)
+	mypath = os.path.join(encoder_path, "autoencoder_" + str(task_number))
 
 	if os.path.isdir(mypath):
 		############ check for the latest checkpoint file in the autoencoder ################
