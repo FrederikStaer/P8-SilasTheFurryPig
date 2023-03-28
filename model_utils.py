@@ -25,6 +25,8 @@ from encoder_utils import *
 
 from autoencoder import Autoencoder, Alexnet_FE
 
+from tqdm import tqdm
+
 
 
 def task_metric(r_error_comp, r_error_ref):
@@ -91,7 +93,7 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 		
 		model.train(False)
 
-		for data in dset_loaders:
+		for data in tqdm(dset_loaders):
 			input_data, labels = data
 			input_data = input_data.to(device)
 			

@@ -166,7 +166,7 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 
 
 		
-	torch.save(model.state_dict(), path + "/best_performing_model.pth")
+	torch.save(model.state_dict(), os.path.join(path, "best_performing_model.pth"))
 
 	elapsed_time = time.time()-since
 	print ("This procedure took {:.2f} minutes and {:.2f} seconds".format(elapsed_time//60, elapsed_time%60))

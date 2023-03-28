@@ -5,6 +5,7 @@
 
 #custom part
 Data/
+models/
 
 # User-specific files
 *.rsuser

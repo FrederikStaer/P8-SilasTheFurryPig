@@ -18,6 +18,8 @@ import sys
 sys.path.append(os.path.join(os.getcwd(), 'utils'))
 from model_utils import *
 
+from tqdm import tqdm
+
 def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, lr = 0.1, alpha = 0.01):
 	""" 
 	Inputs: 
@@ -60,9 +62,14 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 
 	print ("Creating the directory for the new model")
-	os.mkdir(os.path.join(os.getcwd(), "models", "trained_models", "model_1"))
+	trained_models_dir = os.path.join(os.getcwd(), "models", "trained_models")
+	if not os.path.exists(trained_models_dir):
+		os.mkdir(trained_models_dir)
+	model_dir = os.path.join(trained_models_dir, "model_1")
+	if not os.path.exists(model_dir):
+		os.mkdir(model_dir)
 
-	mypath = os.path.join(os.getcwd(), "models", "trained_models", "model_1")
+	mypath = model_dir
 	
 	# Store the number of classes in the file for future use
 	with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
@@ -84,7 +91,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		optimizer = exp_lr_scheduler(optimizer, epoch, lr)
 		model_init = model_init.train(True)
 		
-		for data in dset_loaders:
+		for data in tqdm(dset_loaders):
 			input_data, labels = data
 
 			del data
@@ -123,15 +130,14 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		if(epoch != 0 and epoch != num_epochs -1 and (epoch+1) % 10 == 0):
 			epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
 			torch.save({
-			'epoch': epoch,
-			'epoch_loss': epoch_loss, 
-			'model_state_dict': model_init.state_dict(),
-			'optimizer_state_dict': optimizer.state_dict(),
-
+				'epoch': epoch,
+				'epoch_loss': epoch_loss, 
+				'model_state_dict': model_init.state_dict(),
+				'optimizer_state_dict': optimizer.state_dict(),
 			}, epoch_file_name)
 
 
-	torch.save(model_init.state_dict(), mypath + "/best_performing_model.pth")		
+	torch.save(model_init.state_dict(), os.path.join(mypath, "best_performing_model.pth"))		
 		
 
 	del model_init

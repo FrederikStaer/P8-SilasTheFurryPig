@@ -17,23 +17,24 @@ import torchvision.transforms as transforms
 from autoencoder import Autoencoder, Alexnet_FE
 from encoder_train import *
 from initial_model_train import *
+from model_train import *
 
 parser = argparse.ArgumentParser()
+# Learning options
 parser.add_argument("--lr",         type=float, default=0.0002, help="Learning rate")
 parser.add_argument("--batch_size", type=int,   default=64,     help="Size of the batches")
 parser.add_argument("--latent_dim", type=int,   default=64,     help="Dimensionality of the latent space")
-#tuning not explicitly implemented
-parser.add_argument('--num_epochs_encoder', default=15, type=int, help='Number of epochs you want the encoder model to train on')
-parser.add_argument('--num_epochs_model', default=40, type=int, help='Number of epochs you want  model to train on')
-#tuning not implemented for these
+parser.add_argument('--num_epochs_encoder', default=0, type=int, help='Number of epochs you want the encoder model to train on')
+parser.add_argument('--num_epochs_model',	default=1, type=int, help='Number of epochs you want  model to train on')
 parser.add_argument("--beta1",      type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
+
+# Dataset options
 parser.add_argument("--no_of_tasks",      type=float, default=9,    help="Number of tasks")
 parser.add_argument("--dataset_boundaries",      type=list, default=[4,9],    help="Final task index for each dataset")
+parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
 
 # General options
-parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
 parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall (run/test/tune/dataTest)")
-#"Booleans"
 parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training (when without raytune)? (cuda)")
 
 # Output options 
@@ -42,7 +43,7 @@ parser.add_argument("--tqdm_columns",		type=int,  default=60,    help="Total tex
 
 opt = parser.parse_args()
 
-#convert "Booleans" to actual bools
+#convert "Booleans" to actual bools (command line compatibility)
 if opt.use_gpu == "False":
 	opt.use_gpu = False
 else:
@@ -176,5 +177,5 @@ for task_number in range(1, opt.no_of_tasks+1):
 	#Train the model
 	if(task_number == 1):
 		train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model , True, task_number,  lr = opt.lr)
-	else:	
+	else: 
 		train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model , True, task_number,  lr = opt.lr)
