@@ -73,37 +73,37 @@ print("Current seed: " + str(seed))
 
 # Computing device
 cuda = opt.use_gpu and torch.cuda.is_available()
-device = 'cpu'
-if cuda: device = 'cuda:0'
+#device = 'cpu'
+#if cuda: device = 'cuda:0'
 
 
 #transforms for the tiny-imagenet dataset. Applicable for the tasks 1-4
 data_transforms_tin = {
-		'train': transforms.Compose([
-			transforms.Resize(256),
-			transforms.CenterCrop(224),
-			transforms.ToTensor(),
-			transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-		]),
-		'test': transforms.Compose([
-			transforms.Resize(256),
-			transforms.CenterCrop(224),
-			transforms.ToTensor(),
-			transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-		])
-	}
+	'train': transforms.Compose([
+		transforms.Resize(256),
+		transforms.CenterCrop(224),
+		transforms.ToTensor(),
+		transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+	]),
+	'test': transforms.Compose([
+		transforms.Resize(256),
+		transforms.CenterCrop(224),
+		transforms.ToTensor(),
+		transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+	])
+}
 
 
 #transforms for the mnist dataset. Applicable for the tasks 5-9
 data_transforms_mnist = {
 	'train': transforms.Compose([
-			transforms.ToTensor(),
-			transforms.Normalize([0.1307,], [0.3081,])
-		]),
-		'test': transforms.Compose([
-			transforms.ToTensor(),
-			transforms.Normalize([0.1307,], [0.3081,])
-		])
+		transforms.ToTensor(),
+		transforms.Normalize([0.1307,], [0.3081,])
+	]),
+	'test': transforms.Compose([
+		transforms.ToTensor(),
+		transforms.Normalize([0.1307,], [0.3081,])
+	])
 }
 
 
@@ -116,13 +116,14 @@ feature_extractor = Alexnet_FE(pretrained_alexnet)
 
 for task_number in range(1, opt.no_of_tasks+1):
 	
-	print ("Task Number {}".format(task_number))
+	print("Task Number {}".format(task_number))
 	data_path = os.path.join(os.getcwd(), "Data")
 	encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
 	#model_path = os.getcwd() + "/models/trained_models"
 
 	path_task = os.path.join(data_path, "Task_" + str(task_number))
-	
+
+	image_folder = None
 	if (task_number <= opt.dataset_boundaries[0]):
 		image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
 	else:
@@ -130,10 +131,9 @@ for task_number in range(1, opt.no_of_tasks+1):
 	
 	dset_size = len(image_folder)
 
-	device = torch.device("cuda:0" if opt.use_gpu else "cpu")
+	#device = torch.device(device)
 
-	dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size,
-													shuffle=True, num_workers=4)
+	dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=0) #used to be 4
 
 	mypath = os.path.join(encoder_path, "autoencoder_" + str(task_number))
 
@@ -168,10 +168,10 @@ for task_number in range(1, opt.no_of_tasks+1):
 	#Define an optimizer for this model 
 	optimizer_encoder = optim.Adam(model.parameters(), lr = 0.003, weight_decay= 0.0001)
 
-	print ("Reached here for {}".format(task_number))
-	print ()
+	print("Reached here for {}".format(task_number))
+	print("")
 	#Training the autoencoder
-	autoencoder_train(model, feature_extractor, store_path, optimizer_encoder, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_encoder, checkpoint_file_encoder, opt.use_gpu)
+	autoencoder_train(model, feature_extractor, store_path, optimizer_encoder, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_encoder, checkpoint_file_encoder, cuda)
 
 	#Train the model
 	if(task_number == 1):

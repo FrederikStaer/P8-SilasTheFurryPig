@@ -19,6 +19,8 @@ from encoder_utils import *
 import warnings
 import time
 
+from tqdm import tqdm
+
 warnings.filterwarnings("ignore")
 
 def add_autoencoder(input_dims = 256*13*13, code_dims = 100, task_no = -1):
@@ -36,10 +38,16 @@ def add_autoencoder(input_dims = 256*13*13, code_dims = 100, task_no = -1):
 		
 	autoencoder = Autoencoder(input_dims, code_dims)
 	og_path = os.getcwd()
-	directory_path = og_path + "/models/autoencoders"
+	model_path = os.path.join(og_path, "models")
+	if not os.path.exists(model_path):
+		os.mkdir(model_path)
+	directory_path = os.path.join(model_path, "autoencoders")
+	if not os.path.exists(directory_path):
+		os.mkdir(directory_path)
 	#num_ae = len(next(os.walk(directory_path))[1])
-	store_path = directory_path + "/autoencoder_"+str(task_no)
-	os.mkdir(store_path)
+	store_path = os.path.join(directory_path, "autoencoder_"+str(task_no))
+	if not os.path.exists(store_path):
+		os.mkdir(store_path)
 
 	return autoencoder, store_path
 
@@ -67,22 +75,22 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 	"""
 	since = time.time()
 	best_perform = 10e6
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:0" if use_gpu else "cpu")
 	num_of_classes = 0
 
 	######################## Code for loading the checkpoint file #########################
 	
-	if (os.path.isfile(path + "/" + checkpoint_file)):
-		path_to_file = path + "/" + checkpoint_file
-		print ("Loading checkpoint '{}' ".format(checkpoint_file))
+	path_to_file = os.path.join(path, checkpoint_file)
+	if (os.path.isfile(path_to_file)):
+		print("Loading checkpoint '{}' ".format(checkpoint_file))
 		checkpoint = torch.load(checkpoint_file)
 		start_epoch = checkpoint['epoch']
-		print ("Loading the model")
+		print("Loading the model")
 		model = Autoencoder(256*13*13)
 		model = model.load_state_dict(checkpoint['state_dict'])
-		print ("Loading the optimizer")
+		print("Loading the optimizer")
 		optimizer = optimizer.load_state_dict(checkpoint['optimizer'])
-		print ("Done")
+		print("Done")
 
 	else:
 		start_epoch = 0
@@ -104,11 +112,12 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 		optimizer = exp_lr_scheduler(optimizer, epoch, lr)
 		model = model.train(True)
 		
-		for data in dset_loaders:
+		asda = enumerate(dset_loaders)
+		for _, data in tqdm(asda):
 			input_data, labels = data
 
-			del labels
-			del data
+			#del labels
+			#del data
 
 			if (use_gpu):
 				input_data = Variable(input_data.to(device)) 
@@ -149,11 +158,10 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 		if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs - 1):
 			epoch_file_name = os.path.join(path, str(epoch+1)+'.pth.tar')
 			torch.save({
-			'epoch': epoch,
-			'epoch_loss': epoch_loss, 
-			'model_state_dict': model.state_dict(),
-			'optimizer_state_dict': optimizer.state_dict(),
-
+				'epoch': epoch,
+				'epoch_loss': epoch_loss, 
+				'model_state_dict': model.state_dict(),
+				'optimizer_state_dict': optimizer.state_dict(),
 			}, epoch_file_name)
 
 
