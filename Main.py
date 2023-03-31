@@ -20,6 +20,8 @@ if __name__ == "__main__":
 	from encoder_train import *
 	from initial_model_train import *
 	from model_train import *
+	from data_utils.data_prep_mnist import *
+	from data_utils.data_prep_tin import *
 
 	parser = argparse.ArgumentParser()
 	# Learning options
@@ -34,6 +36,7 @@ if __name__ == "__main__":
 	parser.add_argument("--no_of_tasks",		type=int,	default=9,		help="Number of tasks")
 	parser.add_argument("--dataset_boundaries", type=list,	default=[4,9],  help="Final task index for each dataset")
 	parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
+	parser.add_argument("--download_dataset",	type=str,	default="True",	help="Whether to (re-)download dataset")
 
 	# General options
 	#parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall (run/test/tune/dataTest)")
@@ -47,6 +50,11 @@ if __name__ == "__main__":
 	opt = parser.parse_args()
 
 	#convert "Booleans" to actual bools (command line compatibility)
+	if opt.download_dataset == "False":
+		opt.download_dataset = False
+	else:
+		opt.download_dataset = True
+
 	if opt.use_gpu == "False":
 		opt.use_gpu = False
 	else:
@@ -56,19 +64,24 @@ if __name__ == "__main__":
 
 
 	# --- setup ---
-	# Dataset directory
-	def path_join(p1, p2):
-		return os.path.join(p1, p2)
 
+	# Dataset directory
 	workDir  = pathlib.Path().resolve()
-	dataDir  = path_join(workDir.parent.resolve(), 'datasets')
-	inDataDir = path_join(dataDir, opt.dataset)
-	loss_graphDir = path_join(dataDir, "_loss_graph")
+	dataDir  = os.path.join(workDir.parent.resolve(), 'datasets')
+	inDataDir = os.path.join(dataDir, opt.dataset)
+	loss_graphDir = os.path.join(dataDir, "_loss_graph")
 	if not os.path.exists(loss_graphDir):
 		os.makedirs(loss_graphDir)
 
 	# filepath for storing loss graph
-	graphDirAndName = path_join(loss_graphDir, "loss_graph.png")
+	#graphDirAndName = os.path.join(loss_graphDir, "loss_graph.png")
+	
+	#Downloading datasets
+	if opt.download_dataset:
+		print("Downloading MNIST dataset")
+		download_mnist(workDir)
+		print("Downloading TIN dataset")
+		download_tin(workDir)
 
 
 	# Seed
