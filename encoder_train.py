@@ -116,8 +116,8 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 		for _, data in tqdm(asda):
 			input_data, labels = data
 
-			#del labels
-			#del data
+			del labels
+			del data
 
 			if (use_gpu):
 				input_data = Variable(input_data.to(device)) 

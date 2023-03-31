@@ -22,8 +22,8 @@ from model_train import *
 parser = argparse.ArgumentParser()
 # Learning options
 parser.add_argument("--lr",         type=float, default=0.0002, help="Learning rate")
-parser.add_argument("--batch_size", type=int,   default=64,     help="Size of the batches")
-parser.add_argument("--latent_dim", type=int,   default=64,     help="Dimensionality of the latent space")
+parser.add_argument("--batch_size", type=int,   default=16,     help="Size of the batches")
+parser.add_argument("--code_dims", type=int,   default=100,     help="Dimensionality of the latent space for autoencoders")
 parser.add_argument('--num_epochs_encoder', default=0, type=int, help='Number of epochs you want the encoder model to train on')
 parser.add_argument('--num_epochs_model',	default=1, type=int, help='Number of epochs you want  model to train on')
 parser.add_argument("--beta1",      type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
@@ -76,6 +76,7 @@ print("Current seed: " + str(seed))
 cuda = opt.use_gpu and torch.cuda.is_available()
 #device = 'cpu'
 #if cuda: device = 'cuda:0'
+print("cuda: " + str(cuda))
 
 
 #transforms for the tiny-imagenet dataset. Applicable for the tasks 1-4
@@ -164,7 +165,7 @@ for task_number in range(1, opt.no_of_tasks+1):
 		checkpoint_file_encoder = ""
 
 	#get an autoencoder model and the path where the autoencoder model would be stored
-	model, store_path = add_autoencoder(256*13*13, 100, task_number)
+	model, store_path = add_autoencoder(256*13*13, opt.code_dims, task_number)
 
 	#Define an optimizer for this model 
 	optimizer_encoder = optim.Adam(model.parameters(), lr = 0.003, weight_decay= 0.0001)
@@ -176,6 +177,6 @@ for task_number in range(1, opt.no_of_tasks+1):
 
 	#Train the model
 	if(task_number == 1):
-		train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model , True, task_number,  lr = opt.lr)
+		train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
 	else: 
-		train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model , True, task_number,  lr = opt.lr)
+		train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
