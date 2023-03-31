@@ -131,6 +131,7 @@ if __name__ == "__main__":
 	
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
 		for ae_number in range(1, 9+1):
+			print()
 			print("Autoencoder no. " + str(ae_number))
 			ae_path = os.path.join(encoder_path, "autoencoder_" + str(ae_number))
 			
