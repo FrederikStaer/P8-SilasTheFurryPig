@@ -78,8 +78,8 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	model_init = None
 	ref_model = None
 
-	#The conditional if the directory already exists
-	if os.path.isdir(mypath):
+	#The conditional if the directory and file already exists
+	if os.path.isdir(mypath) and os.path.isfile(os.path.join(mypath, checkpoint_file)):
 		#mypath = path + str(num_ae+1)
 
 		######################### check for the latest checkpoint file #######################
