@@ -181,7 +181,7 @@ if __name__ == "__main__":
 			print ("The correct autoencoder has been found")
 
 		else:
-			print ("Incorrect routing, wrong model has been selected")
+			print ("Incorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
 
 
 		#Load the expert that has been found by this procedure into memory
@@ -238,6 +238,7 @@ if __name__ == "__main__":
 
 		model_loss = running_loss/dset_size
 		model_accuracy = running_corrects.double()/dset_size
+		print("Model accuracy: " + str(model_accuracy))
 
 		#Store the results into a file
 		with open("results.txt", "a") as myfile:
