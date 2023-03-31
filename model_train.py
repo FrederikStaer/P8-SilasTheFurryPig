@@ -78,7 +78,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		#mypath = path + str(num_ae+1)
 
 		######################### check for the latest checkpoint file #######################
-		onlyfiles = [f for f in os.listdir(mypath) if os.isfile(os.join(mypath, f))]
+		onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.join(mypath, f))]
 		max_train = -1
 		flag = False
 
