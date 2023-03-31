@@ -1,3 +1,5 @@
+#Code modified from: https://github.com/wannabeOG/ExpertNet-Pytorch 
+
 """
 Module containing the realization of all the models that are to be used un t 
 """

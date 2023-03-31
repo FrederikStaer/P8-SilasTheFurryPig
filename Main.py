@@ -1,3 +1,6 @@
+#Code modified from: https://github.com/wannabeOG/ExpertNet-Pytorch 
+#				and: https://github.com/rhythm-on-github/P7
+
 if __name__ == "__main__":
 	print("come here piggy piggy")
 
