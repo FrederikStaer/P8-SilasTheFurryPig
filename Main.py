@@ -38,7 +38,7 @@ if __name__ == "__main__":
 	# Dataset options
 	parser.add_argument("--no_of_tasks",		type=int,	default=9,		help="Number of tasks")
 	parser.add_argument("--dataset_boundaries", type=list,	default=[4,9],  help="Final task index for each dataset")
-	parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
+	#parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
 	parser.add_argument("--download_dataset",	type=str,	default="True",	help="Whether to (re-)download dataset")
 
 	# General options
