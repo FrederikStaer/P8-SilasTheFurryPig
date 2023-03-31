@@ -80,14 +80,14 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 	for i in range(num_ae):
 		
-		#print ("This is the present model being evaluated", num_ae)	
+		#print("This is the present model being evaluated", num_ae)	
 		
 		model_path = destination + "/autoencoder_"+str(num_ae-i) +"/best_performing_model.pth"
 		model = Autoencoder(13*13*256)
 		
-		#print ("Loading the model")
+		#print("Loading the model")
 		model.load_state_dict(torch.load(model_path))
-		#print ("Loaded the model")
+		#print("Loaded the model")
 		
 		model.to(device)
 		
@@ -132,8 +132,8 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 	del feature_extractor
 	del running_loss
 
-	print ("The Model number is ", model_number)
-	print ("The best relatedness is ", best_relatedness)
+	print("The Model number is ", model_number)
+	print("The best relatedness is ", best_relatedness)
 
 	return model_number, best_relatedness		
 

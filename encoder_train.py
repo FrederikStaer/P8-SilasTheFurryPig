@@ -100,8 +100,8 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 
 	for epoch in range(start_epoch, num_epochs):
 
-		print ("Epoch {}/{}".format(epoch+1, num_epochs))
-		print ("-"*10)
+		print("Epoch {}/{}".format(epoch+1, num_epochs))
+		print("-"*10)
 
 		# The model is evaluated at each epoch and the best performing model 
 		# on the validation set is saved 
@@ -168,7 +168,7 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 	torch.save(model.state_dict(), os.path.join(path, "best_performing_model.pth"))
 
 	elapsed_time = time.time()-since
-	print ("This procedure took {:.2f} minutes and {:.2f} seconds".format(elapsed_time//60, elapsed_time%60))
-	#print ("The best performing model has a {:.2f} loss on the test set".format(best_perform))
-	print ()
+	print("This procedure took {:.2f} minutes and {:.2f} seconds".format(elapsed_time//60, elapsed_time%60))
+	#print("The best performing model has a {:.2f} loss on the test set".format(best_perform))
+	print()
 

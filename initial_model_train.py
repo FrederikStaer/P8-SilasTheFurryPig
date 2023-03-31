@@ -58,10 +58,10 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 
 		
 	#model_init.to(device)
-	print ("Initializing an Adam optimizer")
+	print("Initializing an Adam optimizer")
 	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 
-	print ("Creating the directory for the new model")
+	print("Creating the directory for the new model")
 	trained_models_dir = os.path.join(os.getcwd(), "models", "trained_models")
 	if not os.path.exists(trained_models_dir):
 		os.mkdir(trained_models_dir)
@@ -81,9 +81,9 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		since = time.time()
 		best_perform = 10e6
 		
-		print ("Epoch {}/{}".format(epoch+1, num_epochs))
-		print ("-"*20)
-		#print ("The training phase is ongoing".format(phase))
+		print("Epoch {}/{}".format(epoch+1, num_epochs))
+		print("-"*20)
+		#print("The training phase is ongoing".format(phase))
 		
 		running_loss = 0
 		

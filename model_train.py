@@ -41,7 +41,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	
 	device = torch.device("cuda:0" if use_gpu else "cpu")
 
-	print ("Determining the most related model")
+	print("Determining the most related model")
 	model_number, best_relatedness = get_initial_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, use_gpu)
 	
 	# Load the most related model in the memory and finetune the model
@@ -68,10 +68,15 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		num_ae = task_number-1
 
 	
-	print ("Checking if a prior training file exists")
+	print("Checking if a prior training file exists")
 	
 	#mypath is the path where the model is going to be stored
 	mypath = path + str(num_ae+1)
+
+	#make variables before conditional to keep them after
+	optimizer = None
+	model_init = None
+	ref_model = None
 
 	#The conditional if the directory already exists
 	if os.path.isdir(mypath):
@@ -109,18 +114,18 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		
 		if (os.path.isfile(os.path.join(mypath, checkpoint_file))):
 			
-			print ("Loading checkpoint '{}' ".format(checkpoint_file))
+			print("Loading checkpoint '{}' ".format(checkpoint_file))
 			checkpoint = torch.load(checkpoint_file)
 			start_epoch = checkpoint['epoch']
 			
-			print ("Loading the model")
+			print("Loading the model")
 			model_init = GeneralModelClass(num_of_classes_old + num_classes)
 			model_init = model_init.load_state_dict(checkpoint['state_dict'])
 			
-			print ("Loading the optimizer")
+			print("Loading the optimizer")
 			optimizer = optimizer.load_state_dict(checkpoint['optimizer'])
 			
-			print ("Done")
+			print("Done")
 
 		else:
 			start_epoch = 0
@@ -131,7 +136,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 	#Will have to create a new directory since it does not exist at the moment
 	else:
-		print ("Creating the directory for the new model")
+		print("Creating the directory for the new model")
 		os.mkdir(mypath)
 
 
@@ -143,17 +148,17 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 	# Load the most related model into memory
 	
-		print ("Loading the most related model")
+		print("Loading the most related model")
 		model_init = GeneralModelClass(num_of_classes_old)
 		model_init.load_state_dict(torch.load(os.path.join(path_to_dir, "best_performing_model.pth")))
-		print ("Model loaded")
+		print("Model loaded")
 
 		#Create (Recreate) the ref_model that has to be used
 		ref_model = copy.deepcopy(model_init)
 		ref_model.train(False)
 		ref_model.to(device)
 
-		#print (ref_model)
+		#print(ref_model)
 
 		for param in model_init.Tmodel.classifier.parameters():
 			param.requires_grad = True
@@ -168,20 +173,21 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			param.requires_grad = True
 
 		
-		#model_init.to(device)
-		print ()
-		print ("Initializing an Adam optimizer")
-		optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 
+
+		print()
+		print("Initializing an Adam optimizer")
+		optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
+		
 
 		# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
-		
+
 		
 		#Actually makes the changes to the model_init, so slightly redundant
-		print ("Initializing the model to be trained")
+		print("Initializing the model to be trained")
 		model_init = initialize_new_model(model_init, num_classes, num_of_classes_old)
-		#print (model_init)
-		#model_init.to(device)
+		#print(model_init)
+		model_init.to(device)
 		start_epoch = 0
 
 	#The training process format or LwF (Learning without Forgetting)
@@ -192,14 +198,14 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		model_init.to(device)
 		ref_model.to(device)
 
-		print ("Using the LwF approach")
+		print("Using the LwF approach")
 		for epoch in range(start_epoch, num_epochs):			
 			since = time.time()
 			best_perform = 10e6
 			
-			print ("Epoch {}/{}".format(epoch+1, num_epochs))
-			print ("-"*20)
-			print ("The training phase is ongoing")
+			print("Epoch {}/{}".format(epoch+1, num_epochs))
+			print("-"*20)
+			print("The training phase is ongoing")
 			
 			running_loss = 0
 			
@@ -231,7 +237,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				loss1_output = output[:, :num_of_classes_old]
 				loss2_output = output[:, num_of_classes_old:]
 
-				print ()
+				#print()
 
 				del output
 
@@ -281,13 +287,13 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	else:
 		
 		model_init.to(device)
-		print ("Using the finetuning approach")
+		print("Using the finetuning approach")
 		
 		for epoch in range(start_epoch, num_epochs):
 
 
-			print ("Epoch {}/{}".format(epoch+1, num_epochs))
-			print ("-"*20)
+			print("Epoch {}/{}".format(epoch+1, num_epochs))
+			print("-"*20)
 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
 			model_init = model_init.train(True)
