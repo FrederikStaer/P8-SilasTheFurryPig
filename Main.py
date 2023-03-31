@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
 	parser.add_argument("--batch_size",			type=int,   default=16,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=0,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
 	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 

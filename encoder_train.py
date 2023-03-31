@@ -112,8 +112,7 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 		optimizer = exp_lr_scheduler(optimizer, epoch, lr)
 		model = model.train(True)
 		
-		asda = enumerate(dset_loaders)
-		for _, data in tqdm(asda):
+		for data in tqdm(dset_loaders):
 			input_data, labels = data
 
 			del labels
