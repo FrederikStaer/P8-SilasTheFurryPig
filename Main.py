@@ -102,10 +102,14 @@ if __name__ == "__main__":
 	#transforms for the mnist dataset. Applicable for the tasks 5-9
 	data_transforms_mnist = {
 		'train': transforms.Compose([
+			transforms.Resize(256),
+			transforms.CenterCrop(224),
 			transforms.ToTensor(),
 			transforms.Normalize([0.1307,], [0.3081,])
 		]),
 		'test': transforms.Compose([
+			transforms.Resize(256),
+			transforms.CenterCrop(224),
 			transforms.ToTensor(),
 			transforms.Normalize([0.1307,], [0.3081,])
 		])
