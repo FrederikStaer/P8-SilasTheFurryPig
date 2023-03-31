@@ -25,6 +25,7 @@ if __name__ == "__main__":
 	from model_train import *
 	from data_utils.data_prep_mnist import *
 	from data_utils.data_prep_tin import *
+	from test_models import *
 
 	parser = argparse.ArgumentParser()
 	# Learning options
@@ -39,10 +40,10 @@ if __name__ == "__main__":
 	parser.add_argument("--no_of_tasks",		type=int,	default=9,		help="Number of tasks")
 	parser.add_argument("--dataset_boundaries", type=list,	default=[4,9],  help="Final task index for each dataset")
 	#parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
-	parser.add_argument("--download_dataset",	type=str,	default="True",	help="Whether to (re-)download dataset")
+	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	#parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall (run/test/tune/dataTest)")
+	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training (when without raytune)? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
 
@@ -71,10 +72,10 @@ if __name__ == "__main__":
 	# Dataset directory
 	workDir  = pathlib.Path().resolve()
 	dataDir  = os.path.join(workDir.parent.resolve(), 'datasets')
-	inDataDir = os.path.join(dataDir, opt.dataset)
-	loss_graphDir = os.path.join(dataDir, "_loss_graph")
-	if not os.path.exists(loss_graphDir):
-		os.makedirs(loss_graphDir)
+	#inDataDir = os.path.join(dataDir, opt.dataset)
+	#loss_graphDir = os.path.join(dataDir, "_loss_graph")
+	#if not os.path.exists(loss_graphDir):
+	#	os.makedirs(loss_graphDir)
 
 	# filepath for storing loss graph
 	#graphDirAndName = os.path.join(loss_graphDir, "loss_graph.png")
@@ -138,68 +139,71 @@ if __name__ == "__main__":
 	#Derives a feature extractor model from the Alexnet model
 	feature_extractor = Alexnet_FE(pretrained_alexnet)
 
-
-	for task_number in range(1, opt.no_of_tasks+1):
+	if opt.mode == "train" or opt.mode == "run":
+		for task_number in range(1, opt.no_of_tasks+1):
 	
-		print("Task Number {}".format(task_number))
-		data_path = os.path.join(os.getcwd(), "Data")
-		encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
-		#model_path = os.getcwd() + "/models/trained_models"
+			print("Task Number {}".format(task_number))
+			data_path = os.path.join(os.getcwd(), "Data")
+			encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
+			#model_path = os.getcwd() + "/models/trained_models"
 
-		path_task = os.path.join(data_path, "Task_" + str(task_number))
+			path_task = os.path.join(data_path, "Task_" + str(task_number))
 
-		image_folder = None
-		if (task_number <= opt.dataset_boundaries[0]):
-			image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
-		else:
-			image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_mnist['train'])	
+			image_folder = None
+			if (task_number <= opt.dataset_boundaries[0]):
+				image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
+			else:
+				image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_mnist['train'])	
 	
-		dset_size = len(image_folder)
+			dset_size = len(image_folder)
 
-		#device = torch.device(device)
+			#device = torch.device(device)
 
-		dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=opt.worker_threads)
+			dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=opt.worker_threads)
 
-		mypath = os.path.join(encoder_path, "autoencoder_" + str(task_number))
+			mypath = os.path.join(encoder_path, "autoencoder_" + str(task_number))
 
-		if os.path.isdir(mypath):
-			############ check for the latest checkpoint file in the autoencoder ################
-			onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-			max_train = -1
-			flag = False
+			if os.path.isdir(mypath):
+				############ check for the latest checkpoint file in the autoencoder ################
+				onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+				max_train = -1
+				flag = False
 
-			model = Autoencoder(256*13*13)
+				model = Autoencoder(256*13*13)
 		
-			store_path = mypath
+				store_path = mypath
 		
-			for file in onlyfiles:
-				if(file.endswith('pth.tr')):
-					flag = True
-					test_epoch = int(file[0])
-					if(test_epoch > max_train): 
-						max_epoch = test_epoch
-						checkpoint_file_encoder = file
-			#######################################################################################
+				for file in onlyfiles:
+					if(file.endswith('pth.tr')):
+						flag = True
+						test_epoch = int(file[0])
+						if(test_epoch > max_train): 
+							max_epoch = test_epoch
+							checkpoint_file_encoder = file
+				#######################################################################################
 		
-			if (flag == False): 
+				if (flag == False): 
+					checkpoint_file_encoder = ""
+
+			else:
 				checkpoint_file_encoder = ""
 
-		else:
-			checkpoint_file_encoder = ""
+			#get an autoencoder model and the path where the autoencoder model would be stored
+			model, store_path = add_autoencoder(256*13*13, opt.code_dims, task_number)
 
-		#get an autoencoder model and the path where the autoencoder model would be stored
-		model, store_path = add_autoencoder(256*13*13, opt.code_dims, task_number)
+			#Define an optimizer for this model 
+			optimizer_encoder = optim.Adam(model.parameters(), lr = 0.003, weight_decay= 0.0001)
 
-		#Define an optimizer for this model 
-		optimizer_encoder = optim.Adam(model.parameters(), lr = 0.003, weight_decay= 0.0001)
+			print("Reached here for {}".format(task_number))
+			print("")
+			#Training the autoencoder
+			autoencoder_train(model, feature_extractor, store_path, optimizer_encoder, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_encoder, checkpoint_file_encoder, cuda)
 
-		print("Reached here for {}".format(task_number))
-		print("")
-		#Training the autoencoder
-		autoencoder_train(model, feature_extractor, store_path, optimizer_encoder, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_encoder, checkpoint_file_encoder, cuda)
+			#Train the model
+			if(task_number == 1):
+				train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
+			else: 
+				train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
 
-		#Train the model
-		if(task_number == 1):
-			train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
-		else: 
-			train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
+	if opt.mode == "test" or opt.mode == "run":
+		test_models()

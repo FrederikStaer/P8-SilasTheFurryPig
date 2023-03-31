@@ -9,37 +9,37 @@ selected, the performance would obviously suffer. A metric to determine how many
 these tasks. 
 
 """
-if __name__ == "__main__":
-	import torch
-	torch.backends.cudnn.benchmark=True
+import torch
+torch.backends.cudnn.benchmark=True
 
-	import torch.nn as nn
-	from torch.autograd import Variable
-	import torch.optim as optim
-	import torch.nn.functional as F
+import torch.nn as nn
+from torch.autograd import Variable
+import torch.optim as optim
+import torch.nn.functional as F
 
-	import torchvision.datasets as datasets
-	import torchvision.models as models
-	import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+import torchvision.models as models
+import torchvision.transforms as transforms
 
-	import argparse 
-	import numpy as np
-	from random import shuffle
-	import os
+import argparse 
+import numpy as np
+from random import shuffle
+import os
 
-	import copy
-	from autoencoder import *
+import copy
+from autoencoder import *
 
-	import sys
-	sys.path.append(os.path.join(os.getcwd(), 'utils'))
-	from tqdm import tqdm
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'utils'))
+from tqdm import tqdm
 
-	from encoder_train import *
-	from encoder_utils import *
+from encoder_train import *
+from encoder_utils import *
 
-	from model_train import *
-	from model_utils import *
+from model_train import *
+from model_utils import *
 
+def test_models():
 	parser = argparse.ArgumentParser(description='Test file')
 	#parser.add_argument('--task_number', default=1, type=int, help='Select the task you want to test out the architecture; choose from 1-4')
 	parser.add_argument('--use_gpu', default=False, type=bool, help = 'Set the flag if you wish to use the GPU')
