@@ -14,6 +14,7 @@ if __name__ == "__main__":
 	from datetime import datetime
 	from tqdm import tqdm
 	from multiprocessing import freeze_support
+	import shutil
 
 	import torchvision.datasets as datasets
 	import torchvision.models as models
@@ -43,7 +44,7 @@ if __name__ == "__main__":
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
+	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
 
@@ -140,6 +141,15 @@ if __name__ == "__main__":
 	feature_extractor = Alexnet_FE(pretrained_alexnet)
 
 	if opt.mode == "train" or opt.mode == "run":
+		#remove prior models
+		ae_dir = os.path.join(workDir, "models", "autoencoders")
+		expert_dir = os.path.join(workDir, "models", "trained_models")
+		if(os.path.exists(ae_dir)):
+			shutil.rmtree(ae_dir)
+		if(os.path.exists(expert_dir)):
+			shutil.rmtree(expert_dir)
+
+		#start training
 		for task_number in range(1, opt.no_of_tasks+1):
 	
 			print("Task Number {}".format(task_number))
