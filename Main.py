@@ -155,7 +155,7 @@ if __name__ == "__main__":
 			print("Task Number {}".format(task_number))
 			data_path = os.path.join(os.getcwd(), "Data")
 			encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
-			#model_path = os.getcwd() + "/models/trained_models"
+			#model_path = os.path.join(os.getcwd(), "models", "trained_models")
 
 			path_task = os.path.join(data_path, "Task_" + str(task_number))
 
@@ -170,8 +170,13 @@ if __name__ == "__main__":
 			#device = torch.device(device)
 
 			dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=opt.worker_threads)
-
-			mypath = os.path.join(encoder_path, "autoencoder_" + str(task_number))
+			
+			#current autoencoder path
+			path_ae = os.path.join(path, "models", "autoencoders")
+			num_ae = 1
+			if task_number > 1:
+				num_ae = len(next(os.walk(path_ae))[1])
+			mypath = os.path.join(encoder_path, "autoencoder_" + str(num_ae))
 
 			if os.path.isdir(mypath):
 				############ check for the latest checkpoint file in the autoencoder ################

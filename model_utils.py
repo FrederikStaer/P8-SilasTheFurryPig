@@ -72,7 +72,7 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 	"""	
 	path = os.getcwd()
-	destination = path + "/models/autoencoders"
+	destination = os.path.join(path, "models", "autoencoders")
 	num_ae = len(next(os.walk(destination))[1])
 	best_relatedness = 0
 	model_number = -999
@@ -82,9 +82,9 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 	for i in range(num_ae):
 		
-		#print("This is the present model being evaluated", num_ae)	
+		#print("This is the present model being evaluated", num_ae-i)	
 		
-		model_path = destination + "/autoencoder_"+str(num_ae-i) +"/best_performing_model.pth"
+		model_path = os.path.join(destination, "autoencoder_"+str(num_ae-i), "best_performing_model.pth")
 		model = Autoencoder(13*13*256)
 		
 		#print("Loading the model")
