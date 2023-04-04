@@ -52,7 +52,7 @@ def kaiming_initilaization(layer):
 	nn.init.kaiming_normal_(layer.weight, nonlinearity='sigmoid')
 
 
-def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_criterion, use_gpu):
+def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_criterion, use_gpu, ae_idxs):
 	""" 
 	Inputs: 
 		1) feature_extractor = A reference to the model which needs to be initialized
@@ -61,30 +61,31 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 		   initializing the new model
 	   	4) encoder_criterion = The loss function for the encoders
 	   	5) use_gpu = Flag set to True if the GPU is to be used  
+		6) ae_idxs = List of indexes of the autoencoders to be tested (1st idx is the one to test against)
 
 	Outputs:
 		1) model_number = The number for the model that is most closely related to the present task  
 		2) best_relatedness = The relatedness this model task bears with the present task calculated as per
 			section 3.3 of the paper
 
-	Function: Returns the model number that is most related to the present task and a metric that measures 
-	how related these two given tasks are
+	Function: Returns the model number from the given idxs that is most related to the 1st idx and a metric that measures 
+	how related these two given models are
 
 	"""	
 	path = os.getcwd()
 	destination = os.path.join(path, "models", "autoencoders")
-	num_ae = len(next(os.walk(destination))[1])
-	best_relatedness = 0
-	model_number = -999
+	best_relatedness = -999
+	model_number = None
 	device = torch.device("cuda:0" if use_gpu else "cpu")
-	running_loss = 0
 	feature_extractor = feature_extractor.to(device)
+	rerror_comp = None
 
-	for i in range(num_ae):
+	for i in ae_idxs:
+		running_loss = 0
+
+		#print("This is the present model being evaluated", i+1)	
 		
-		#print("This is the present model being evaluated", num_ae-i)	
-		
-		model_path = os.path.join(destination, "autoencoder_"+str(num_ae-i), "best_performing_model.pth")
+		model_path = os.path.join(destination, "autoencoder_"+str(i), "best_performing_model.pth")
 		model = Autoencoder(13*13*256)
 		
 		#print("Loading the model")
@@ -120,16 +121,15 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 		
 		del model
 
-		if (i == 0): 
+		if (i == ae_idxs[0]): 
 			rerror_comp = running_loss
 		
 		else:
-			
 			relatedness = task_metric(running_loss, rerror_comp)
 			
 			if (relatedness > best_relatedness):
 				best_relatedness = relatedness
-				model_number = (num_ae - i)
+				model_number = (i)
 	
 	del feature_extractor
 	del running_loss
@@ -137,7 +137,7 @@ def get_initial_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 	print("The Model number is ", model_number)
 	print("The best relatedness is ", best_relatedness)
 
-	return model_number, best_relatedness		
+	return model_number, best_relatedness 
 
 
 

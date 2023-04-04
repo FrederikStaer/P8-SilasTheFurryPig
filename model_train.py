@@ -16,7 +16,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, lr = 0.1, alpha = 0.01):
+def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, lr = 0.1, alpha = 0.01):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -27,8 +27,9 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		6) num_of_epochs = Number of epochs for which the model needs to be trained
 		7) use_gpu = A flag which would be set if the user has a CUDA enabled device
 		8) task_number = A number which represents the task for which the model is being trained
-		9) lr = initial learning rate for the model
-		10) alpha = Tradeoff factor for the loss   
+		9) relatedness_info = the idx and relatedness for most related model
+		10) lr = initial learning rate for the model
+		11) alpha = Tradeoff factor for the loss   
 
 	Function: Trains the model on the given task
 		1) If the task relatedness is greater than 0.85, the function uses the Learning without Forgetting method
@@ -40,11 +41,12 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		order to ensure that these weights do not have a learning signal from the loss function. 
 
 	"""	
+	(model_number, best_relatedness) = relatedness_info
 	
 	device = torch.device("cuda:0" if use_gpu else "cpu")
 
-	print("Determining the most related model")
-	model_number, best_relatedness = get_initial_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, use_gpu)
+	path = os.getcwd()
+	destination = os.path.join(path, "models", "autoencoders")
 	
 	# Load the most related model in the memory and finetune the model
 	new_path = os.path.join(os.getcwd(), "models", "trained_models")

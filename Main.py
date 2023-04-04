@@ -218,7 +218,15 @@ if __name__ == "__main__":
 			if(task_number == 1):
 				train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
 			else: 
-				train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
+				print("Determining the most related model")
+				path = os.getcwd()
+				destination = os.path.join(path, "models", "autoencoders")
+				num_ae = len(next(os.walk(destination))[1])
+				ae_idxs = list(reversed(range(1, num_ae+1)))
+				model_number, best_relatedness = get_related_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, cuda, ae_idxs)
+				relatedness_info = (model_number, best_relatedness)
+
+				train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
 
 	if opt.mode == "test" or opt.mode == "run":
 		test_models()
