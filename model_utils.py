@@ -100,8 +100,8 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 			input_data, labels = data
 			input_data = input_data.to(device)
 			
-			del data
-			del labels
+			#del data
+			#del labels
 			
 			input_to_ae = feature_extractor(input_data)
 			input_to_ae = input_to_ae.view(input_to_ae.size(0), -1)
@@ -111,15 +111,15 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 			loss = encoder_criterion(outputs, input_to_ae)
 			
 			
-			del input_to_ae
-			del outputs
+			#del input_to_ae
+			#del outputs
 			
 			
 			running_loss = loss.item() + running_loss
 
 		running_loss = running_loss/dataset_size
 		
-		del model
+		#del model
 
 		if (i == ae_idxs[0]): 
 			rerror_comp = running_loss
@@ -131,8 +131,8 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 				best_relatedness = relatedness
 				model_number = (i)
 	
-	del feature_extractor
-	del running_loss
+	#del feature_extractor
+	#del running_loss
 
 	print("The Model number is ", model_number)
 	print("The best relatedness is ", best_relatedness)
@@ -221,11 +221,11 @@ def model_criterion(preds, labels, flag, T = 2):
 		preds = preds/sum_preds_ref
 		labels = labels/sum_labels_ref
 		
-		del sum_labels_ref
-		del sum_preds_ref
+		#del sum_labels_ref
+		#del sum_preds_ref
 		
-		del sum_preds
-		del sum_labels
+		#del sum_preds
+		#del sum_labels
 
 		loss = torch.sum(-1*preds*torch.log(labels), dim = 1)
 		batch_size = loss.size()[0]

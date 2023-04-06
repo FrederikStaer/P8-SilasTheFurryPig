@@ -203,7 +203,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		ref_model.to(device)
 
 		print("Using the LwF approach")
-		for epoch in range(start_epoch, num_epochs):			
+		for epoch in range(start_epoch, num_epochs):
 			since = time.time()
 			best_perform = 10e6
 			
@@ -220,7 +220,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
 
-				del data
+				#del data
 
 				if (use_gpu):
 					input_data = Variable(input_data.to(device))
@@ -232,7 +232,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				
 				output = model_init(input_data)
 				ref_output = ref_model(input_data)
-				del input_data
+				#del input_data
 
 				optimizer.zero_grad()
 
@@ -243,21 +243,21 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				#print()
 
-				del output
+				#del output
 
 				loss_1 = model_criterion(loss1_output, ref_output, flag = "Distill")
-				del ref_output
+				#del ref_output
 				
 				# loss_2 takes in the outputs from the nodes that were initialized for the new task
 				
 				loss_2 = model_criterion(loss2_output, labels, flag = "CE")
-				del labels
-				#del output
+				#del labels
+					#del output
 
 				total_loss = alpha*loss_1 + loss_2
 
-				del loss_1
-				del loss_2
+				#del loss_1
+				#del loss_2
 
 				
 				total_loss.backward()
@@ -284,8 +284,8 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		torch.save(model_init.state_dict(), os.path.join(mypath, "best_performing_model.pth"))	
 		
 
-		del model_init
-		del ref_model
+		#del model_init
+		#del ref_model
 	
 	#Process for finetuning the model
 	else:
@@ -306,7 +306,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
-				del data
+				#del data
 
 				if (use_gpu):
 					input_data = Variable(input_data.to(device))
@@ -318,8 +318,8 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				output = model_init(input_data)
 				
-				del input_data
-				#del output
+				#del input_data
+					#del output
 				
 				optimizer.zero_grad()
 				model_init.zero_grad()
@@ -327,8 +327,8 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				#Implemented as explained in the doc string
 				loss = model_criterion(output[num_of_classes_old:], labels, flag = 'CE')
 
-				del output
-				del labels
+				#del output
+				#del labels
 
 				loss.backward()
 				# Zero the gradients from the older classes
@@ -354,5 +354,5 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 		torch.save(model_init.state_dict(), os.path.join(mypath, "best_performing_model.pth"))
 
-		del model_init
-		del ref_model
+		#del model_init
+		#del ref_model
