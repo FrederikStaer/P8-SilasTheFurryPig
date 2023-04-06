@@ -265,6 +265,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				if total_loss.item() != total_loss.item():
 					print("error: NaN loss")
+					output = model_init(input_data)
 				running_loss += total_loss.item()
 				
 			epoch_loss = running_loss/dset_size

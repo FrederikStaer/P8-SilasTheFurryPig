@@ -57,5 +57,6 @@ class GeneralModelClass(nn.Module):
 		self.Tmodel.classifier[-1] = nn.Linear(self.Tmodel.classifier[-1].in_features, classes)
 
 	def forward(self, x):
-		return self.Tmodel(x)
+		output = self.Tmodel(x)
+		return output
 
