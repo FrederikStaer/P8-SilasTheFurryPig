@@ -50,7 +50,6 @@ def test_models():
 	use_gpu = args.use_gpu
 	batch_size = args.batch_size
 
-	#randomly shuffle the tasks in the sequence
 	task_number_list = [x for x in range(1,10)]
 	#shuffle(task_number_list)
 
@@ -98,8 +97,8 @@ def test_models():
 
 
 	#shuffle the sequence of the tasks
-	print("Shuffling tasks")
-	shuffle(task_number_list)
+	#print("Shuffling tasks")
+	#shuffle(task_number_list)
 
 	#set the device to be used and initialize the feature extractor to feed the data into the autoencoder
 	device = torch.device("cuda:0" if use_gpu else "cpu")
