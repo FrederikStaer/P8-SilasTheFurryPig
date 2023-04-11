@@ -340,7 +340,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				running_loss += loss.item()
 				
-			epoch_loss = running_loss/dset_size[phase]
+			epoch_loss = running_loss/dset_size
 
 			print('Epoch Loss:{}'.format(epoch_loss))
 
