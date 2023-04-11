@@ -238,8 +238,8 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				# loss_1 only takes in the outputs from the nodes of the old classes 
 
-				loss1_output = output[:, :num_of_classes_old]
-				loss2_output = output[:, num_of_classes_old:]
+				loss1_output = output[:, :-num_classes]
+				loss2_output = output[:, -num_classes:]
 
 				#print()
 
@@ -327,15 +327,15 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				optimizer.zero_grad()
 				model_init.zero_grad()
 				
-				#Implemented as explained in the doc string
-				loss = model_criterion(output[-(num_classes-num_of_classes_old):], labels, flag = 'CE')
+				#loss for new classes
+				loss = model_criterion(output[:, -num_classes:], labels, flag = 'CE')
 
 				#del output
 				#del labels
 
 				loss.backward()
 				# Zero the gradients from the older classes
-				model_init.Tmodel.classifier[-1].weight.grad[:num_of_classes_old,:] = 0  
+				model_init.Tmodel.classifier[-1].weight.grad[:-num_classes,:] = 0  
 				optimizer.step()
 
 				running_loss += loss.item()

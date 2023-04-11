@@ -42,12 +42,12 @@ from model_utils import *
 def test_models():
 	parser = argparse.ArgumentParser(description='Test file')
 	#parser.add_argument('--task_number', default=1, type=int, help='Select the task you want to test out the architecture; choose from 1-4')
-	parser.add_argument('--use_gpu', default=False, type=bool, help = 'Set the flag if you wish to use the GPU')
+	parser.add_argument('--use_gpu', default=True, type=bool, help = 'Set the flag if you wish to use the GPU')
 	parser.add_argument('--batch_size', default=16, type=int, help='Batch size you want to use whilst testing the model')
 
 	#get the arguments passed in 
 	args = parser.parse_args()
-	use_gpu = args.use_gpu
+	use_gpu = args.use_gpu  and torch.cuda.is_available()
 	batch_size = args.batch_size
 
 	task_number_list = [x for x in range(1,10)]
@@ -57,13 +57,13 @@ def test_models():
 
 	#transformations for the test data
 	data_transforms_tin = {
-			'test': transforms.Compose([
-				transforms.Resize(256),
-				transforms.CenterCrop(224),
-				transforms.ToTensor(),
-				transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-			])
-		}
+		'test': transforms.Compose([
+			transforms.Resize(256),
+			transforms.CenterCrop(224),
+			transforms.ToTensor(),
+			transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+		])
+	}
 
 	#transforms for the mnist dataset. Applicable for the tasks 5-9
 	data_transforms_mnist = {
@@ -72,7 +72,7 @@ def test_models():
 				transforms.CenterCrop(224),
 				transforms.ToTensor(),
 				transforms.Normalize([0.1307,], [0.3081,])
-			])
+		])
 	}
 
 
@@ -128,7 +128,7 @@ def test_models():
 		best_loss = 99999999999
 		model_number = 0
 
-	
+		
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
 		for ae_number in range(1, 9+1):
 			print()
@@ -229,7 +229,7 @@ def test_models():
 			#check over only the specific layer identified by the AE (similar to single head setting)
 			#uncomment this line if you wish to evalute this setting
 			#_, preds = torch.max(outputs[:, -classes[model_number]:], 1)
-		
+			
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()
 
