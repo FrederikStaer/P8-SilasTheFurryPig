@@ -197,7 +197,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	#The training process format or LwF (Learning without Forgetting)
 	# Add the start epoch code 
 	
-	if (best_relatedness > 0.85):
+	if (False): #best_relatedness > 0.85):
 
 		model_init.to(device)
 		ref_model.to(device)
@@ -215,7 +215,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			
 			#scales the optimizer every 10 epochs 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
-			#model_init = model_init.train(True)
+			model_init = model_init.train(True)
 			
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
@@ -263,9 +263,9 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				total_loss.backward()
 				optimizer.step()
 
-				if total_loss.item() != total_loss.item():
-					print("error: NaN loss")
-					output = model_init(input_data)
+				#if total_loss.item() != total_loss.item():
+					#print("error: NaN loss")
+					#output = model_init(input_data)
 				running_loss += total_loss.item()
 				
 			epoch_loss = running_loss/dset_size
@@ -273,7 +273,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 			print('Epoch Loss:{}'.format(epoch_loss))
 
-			if(epoch != 0 and epoch != num_epochs -1 and (epoch+1) % 10 == 0):
+			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
 				torch.save({
 				'epoch': epoch,
@@ -328,7 +328,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				model_init.zero_grad()
 				
 				#Implemented as explained in the doc string
-				loss = model_criterion(output[num_of_classes_old:], labels, flag = 'CE')
+				loss = model_criterion(output[-(num_classes-num_of_classes_old):], labels, flag = 'CE')
 
 				#del output
 				#del labels
