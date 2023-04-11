@@ -345,7 +345,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			print('Epoch Loss:{}'.format(epoch_loss))
 
 			if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs -1):
-				epoch_file_name = os.path.join(path_to_model, str(epoch+1)+'.pth.tar')
+				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
 				torch.save({
 				'epoch': epoch,
 				'epoch_loss': epoch_loss, 
