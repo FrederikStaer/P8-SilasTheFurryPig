@@ -197,7 +197,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	#The training process format or LwF (Learning without Forgetting)
 	# Add the start epoch code 
 	
-	if (False): #best_relatedness > 0.85):
+	if (best_relatedness > 0.85):
 
 		model_init.to(device)
 		ref_model.to(device)
