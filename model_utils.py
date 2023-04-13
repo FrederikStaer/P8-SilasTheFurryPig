@@ -41,6 +41,7 @@ def task_metric(r_error_ref, r_error_comp):
 		1) task_metric = The task metric that was used in the paper
 		   Max value = 1 indicates that the tasks are heavily related
 		   Max value = 0 indicates that the tasks are not at all related 
+		   (P8 group's note: the above "limits" are false, as can be seen by the new, equivalent function at the return)
 		
 	Function: This function returns the task metric
 
