@@ -45,7 +45,7 @@ def task_metric(r_error_comp, r_error_ref):
 	Function: This function returns the task metric
 
 	"""
-	return (1-((r_error_ref-r_error_comp)/r_error_comp))
+	return 2-(r_error_ref/r_error_comp) #equivalent to (1-((r_error_ref-r_error_comp)/r_error_comp))
 
 
 def kaiming_initilaization(layer):
