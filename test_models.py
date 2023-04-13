@@ -183,10 +183,10 @@ def test_models():
 
 
 		if(model_number == task_number):
-			print ("The correct autoencoder has been found")
+			print ("\nThe correct autoencoder has been found")
 
 		else:
-			print ("Incorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
+			print ("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
 
 
 		#Load the expert that has been found by this procedure into memory
@@ -225,14 +225,15 @@ def test_models():
 			model.to(device)
 
 			outputs = model(input_data)
-			loss = model_criterion(outputs, labels, 'CE')
+
 		
-			#for a more robust analysis check over the entire output layer (similar to multi head setting)
-			_, preds = torch.max(outputs, 1)
+			#(currently not functional) for a more robust analysis check over the entire output layer (similar to multi head setting)
+			#_, preds = torch.max(outputs, 1
+			#loss = model_criterion(outputs, labels, 'CE')
 
 			#check over only the specific layer identified by the AE (similar to single head setting)
-			#uncomment this line if you wish to evalute this setting
-			#_, preds = torch.max(outputs[:, -classes[model_number]:], 1)
+			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
+			loss = model_criterion(outputs[:, -classes[model_number-1]:], labels, 'CE')
 			
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()
@@ -243,7 +244,7 @@ def test_models():
 
 		model_loss = running_loss/dset_size
 		model_accuracy = running_corrects.double()/dset_size
-		print("Model accuracy: " + str(model_accuracy))
+		print("\nModel accuracy: " + str(model_accuracy))
 
 		#Store the results into a file
 		with open("results.txt", "a") as myfile:
