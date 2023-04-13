@@ -271,7 +271,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			epoch_loss = running_loss/dset_size
 
 
-			print('Epoch Loss:{}'.format(epoch_loss))
+			print('\nEpoch Loss:{}'.format(epoch_loss))
 
 			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
@@ -335,14 +335,14 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				loss.backward()
 				# Zero the gradients from the older classes
-				model_init.Tmodel.classifier[-1].weight.grad[:-num_classes,:] = 0  
+				model_init.Tmodel.classifier[-1].weight.grad[:-num_classes,:] = 0 
 				optimizer.step()
 
 				running_loss += loss.item()
 				
 			epoch_loss = running_loss/dset_size
 
-			print('Epoch Loss:{}'.format(epoch_loss))
+			print('\nEpoch Loss:{}'.format(epoch_loss))
 
 			if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs -1):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')

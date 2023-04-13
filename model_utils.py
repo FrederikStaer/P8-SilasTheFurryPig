@@ -83,7 +83,7 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 	for i in ae_idxs:
 		running_loss = 0
 
-		#print("This is the present model being evaluated", i+1)	
+		print("testing AE no. " + str(i))	
 		
 		model_path = os.path.join(destination, "autoencoder_"+str(i), "best_performing_model.pth")
 		model = Autoencoder(13*13*256)
@@ -105,9 +105,10 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 			
 			input_to_ae = feature_extractor(input_data)
 			input_to_ae = input_to_ae.view(input_to_ae.size(0), -1)
+			
+			input_to_ae = F.sigmoid(input_to_ae)
 
 			outputs = model(input_to_ae)
-			
 			loss = encoder_criterion(outputs, input_to_ae)
 			
 			
@@ -123,9 +124,11 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 		if (i == ae_idxs[0]): 
 			rerror_comp = running_loss
+			print("\nae loss: " + str(running_loss))
 		
 		else:
 			relatedness = task_metric(running_loss, rerror_comp)
+			print("\nae loss: " + str(running_loss) + ", relatedness: " + str(relatedness))
 			
 			if (relatedness > best_relatedness):
 				best_relatedness = relatedness

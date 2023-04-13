@@ -153,7 +153,7 @@ def autoencoder_train(model, feature_extractor, path, optimizer, encoder_criteri
 		epoch_loss = running_loss/dset_size
 
 		
-		print('Epoch Loss:{}'.format(epoch_loss))
+		print('\nEpoch Loss:{}'.format(epoch_loss))
 			
 		#Creates a checkpoint every 5 epochs
 		if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs - 1):

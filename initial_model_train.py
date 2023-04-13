@@ -127,7 +127,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		epoch_loss = running_loss/dset_size
 
 
-		print('Epoch Loss:{}'.format(epoch_loss))
+		print('\nEpoch Loss:{}'.format(epoch_loss))
 
 		if(epoch != 0 and epoch != num_epochs -1 and (epoch+1) % 10 == 0):
 			epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')

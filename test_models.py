@@ -158,6 +158,8 @@ def test_models():
 				#get the input to the autoencoder from the conv backbone of the Alexnet
 				input_to_ae = feature_extractor(input_data)
 				input_to_ae = input_to_ae.view(input_to_ae.size(0), -1)
+
+				input_to_ae = F.sigmoid(input_to_ae)
 			
 				#get the outputs from the model
 				preds = model(input_to_ae)
