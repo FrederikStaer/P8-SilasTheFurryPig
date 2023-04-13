@@ -197,7 +197,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	#The training process format or LwF (Learning without Forgetting)
 	# Add the start epoch code 
 	
-	if (best_relatedness > 0.85):
+	if (False)#best_relatedness > 0.85):
 
 		model_init.to(device)
 		ref_model.to(device)
@@ -325,7 +325,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 					#del output
 				
 				optimizer.zero_grad()
-				model_init.zero_grad()
+				#model_init.zero_grad()
 				
 				#loss for new classes
 				loss = model_criterion(output[:, -num_classes:], labels, flag = 'CE')
