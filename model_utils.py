@@ -174,7 +174,7 @@ def initialize_new_model(model_init, num_classes, num_of_classes_old):
 	nn.init.kaiming_normal_(model_init.Tmodel.classifier[-1].weight, nonlinearity='sigmoid')
 	
 	#kaiming_initilaization()
-	model_init.Tmodel.classifier[-1].weight.data[:num_of_classes_old, :] = weight_info
+	model_init.Tmodel.classifier[-1].weight.data[:-num_classes, :] = weight_info
 	model_init.to(device)
 	model_init.train(True)
 	

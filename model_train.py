@@ -197,7 +197,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	#The training process format or LwF (Learning without Forgetting)
 	# Add the start epoch code 
 	
-	if (False):#best_relatedness > 0.85):
+	if (best_relatedness > 0.85):
 
 		model_init.to(device)
 		ref_model.to(device)
@@ -235,6 +235,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				#del input_data
 
 				optimizer.zero_grad()
+				model_init.zero_grad()
 
 				# loss_1 only takes in the outputs from the nodes of the old classes 
 
@@ -325,7 +326,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 					#del output
 				
 				optimizer.zero_grad()
-				#model_init.zero_grad()
+				model_init.zero_grad()
 				
 				#loss for new classes
 				loss = model_criterion(output[:, -num_classes:], labels, flag = 'CE')
@@ -335,7 +336,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 				loss.backward()
 				# Zero the gradients from the older classes
-				model_init.Tmodel.classifier[-1].weight.grad[:-num_classes,:] = 0 
+				#model_init.Tmodel.classifier[-1].weight.grad[:-num_classes, :] = 0 
 				optimizer.step()
 
 				running_loss += loss.item()
