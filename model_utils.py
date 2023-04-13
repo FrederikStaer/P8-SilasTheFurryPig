@@ -31,11 +31,11 @@ from tqdm import tqdm
 
 
 
-def task_metric(r_error_comp, r_error_ref):
+def task_metric(r_error_ref, r_error_comp):
 	""" 
 	Inputs: 
-		1) r_error_comp = Reconstruction error for model 1
-		2) r_error_ref = Reconstruction error for model 2  
+		1) r_error_comp = Reconstruction error for the new task
+		2) r_error_ref = Reconstruction error for some prior task
 		
 	Outputs:
 		1) task_metric = The task metric that was used in the paper
