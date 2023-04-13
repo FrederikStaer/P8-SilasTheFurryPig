@@ -63,7 +63,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	new_classes = num_of_classes_old + num_classes
 	
 	#Check the number of models that already exist
-	num_ae = len(next(os.walk(new_path))[1])
+	num_ae = len(next(os.walk(destination))[1])
 	#num_ae = 0
 
 	#If task_number is less than num_ae it suggests that the directory had already been created
@@ -144,13 +144,13 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		os.mkdir(mypath)
 
 
-	# Store the number of classes in the file for future use
+		# Store the number of classes in the file for future use
 		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
 			input_to_txtfile = str(new_classes)
 			file1.write(input_to_txtfile)
 			file1.close()
 
-	# Load the most related model into memory
+		# Load the most related model into memory
 	
 		print("Loading the most related model")
 		model_init = GeneralModelClass(num_of_classes_old)

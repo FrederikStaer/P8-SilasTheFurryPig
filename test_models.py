@@ -49,8 +49,10 @@ def test_models():
 	args = parser.parse_args()
 	use_gpu = args.use_gpu  and torch.cuda.is_available()
 	batch_size = args.batch_size
-
-	task_number_list = [x for x in range(1,10)]
+	
+	new_path = os.path.join(os.getcwd(), "models", "autoencoders")
+	num_ae = len(next(os.walk(new_path))[1])
+	task_number_list = [x for x in range(1,num_ae+1)]
 	#shuffle(task_number_list)
 
 	classes = []
@@ -86,7 +88,7 @@ def test_models():
 	for task_number in task_number_list:
 
 		path_task = os.path.join(data_path, "Task_" + str(task_number))
-		if(task_number >=1 and task_number <=4):
+		if(task_number <=4):
 			#get the image folder
 			image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['test'])
 			classes.append(len(image_folder.classes))
@@ -130,7 +132,7 @@ def test_models():
 
 		
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
-		for ae_number in range(1, 9+1):
+		for ae_number in task_number_list:
 			print()
 			print("Autoencoder no. " + str(ae_number))
 			ae_path = os.path.join(encoder_path, "autoencoder_" + str(ae_number))
