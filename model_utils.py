@@ -188,7 +188,7 @@ def model_criterion(preds, labels, flag, T = 2):
 		this parameter is used only when the flag option is set with the "Distill"
 		option
 	"""
-	device = torch.device("cuda:0" if torch.cuda.is_available else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 	preds = preds.to(device)
 	labels = labels.to(device)
