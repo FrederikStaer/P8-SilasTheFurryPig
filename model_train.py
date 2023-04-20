@@ -77,123 +77,61 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	#mypath is the path where the model is going to be stored
 	mypath = path + str(num_ae+1)
 
-	#make variables before conditional to keep them after
-	optimizer = None
-	model_init = None
-	ref_model = None
-
-	#The conditional if the directory and file already exists
-	if os.path.isdir(mypath) and os.path.isfile(os.path.join(mypath, checkpoint_file)):
-		#mypath = path + str(num_ae+1)
-
-		######################### check for the latest checkpoint file #######################
-		onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-		max_train = -1
-		flag = False
-
-		#Check the latest epoch file that was created
-		for file in onlyfiles:
-			if(file.endswith('pth.tr')):
-				flag = True
-				test_epoch = file[0]
-				if(test_epoch > max_train): 
-					max_epoch = test_epoch
-					checkpoint_file = file
-		#######################################################################################
-		
-		if (flag == False): 
-			checkpoint_file = ""
-
-		
-		#Steps to create a ref_model in order to prevent storing this model as well
-		model_init = GeneralModelClass(num_of_classes_old)
-		model_init.load_state_dict(torch.load(os.path.join(path_to_dir, "best_performing_model.pth")))
-		
-		#Create (Recreate) the ref_model that has to be used
-		ref_model = copy.deepcopy(model_init)
-		ref_model.train(False)
-		ref_model.to(device)
-		
-		######################## Code for loading the checkpoint file #########################
-		
-		if (os.path.isfile(os.path.join(mypath, checkpoint_file))):
-			
-			print("Loading checkpoint '{}' ".format(checkpoint_file))
-			checkpoint = torch.load(checkpoint_file)
-			start_epoch = checkpoint['epoch']
-			
-			print("Loading the model")
-			model_init = GeneralModelClass(num_of_classes_old + num_classes)
-			model_init = model_init.load_state_dict(checkpoint['state_dict'])
-			
-			print("Loading the optimizer")
-			optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
-			optimizer = optimizer.load_state_dict(checkpoint['optimizer'])
-			
-			print("Done")
-
-		else:
-			start_epoch = 0
-
-		##########################################################################################
-
-
 
 	#Will have to create a new directory since it does not exist at the moment
-	else:
-		print("Creating the directory for the new model")
-		os.mkdir(mypath)
+	print("Creating the directory for the new model")
+	os.mkdir(mypath)
 
 
-		# Store the number of classes in the file for future use
-		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
-			input_to_txtfile = str(new_classes)
-			file1.write(input_to_txtfile)
-			file1.close()
+	# Store the number of classes in the file for future use
+	with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
+		input_to_txtfile = str(new_classes)
+		file1.write(input_to_txtfile)
+		file1.close()
 
-		# Load the most related model into memory
+	# Load the most related model into memory
 	
-		print("Loading the most related model")
-		model_init = GeneralModelClass(num_of_classes_old)
-		model_init.load_state_dict(torch.load(os.path.join(path_to_dir, "best_performing_model.pth")))
-		print("Model loaded")
+	print("Loading the most related model")
+	model_init = GeneralModelClass(num_of_classes_old)
+	model_init.load_state_dict(torch.load(os.path.join(path_to_dir, "best_performing_model.pth")))
+	print("Model loaded")
 
-		#Create (Recreate) the ref_model that has to be used
-		ref_model = copy.deepcopy(model_init)
-		ref_model.train(False)
-		ref_model.to(device)
+	#Create (Recreate) the ref_model that has to be used
+	ref_model = copy.deepcopy(model_init)
+	ref_model.train(False)
+	ref_model.to(device)
 
-		#print(ref_model)
+	#print(ref_model)
 
-		for param in model_init.Tmodel.classifier.parameters():
-			param.requires_grad = True
+	for param in model_init.Tmodel.classifier.parameters():
+		param.requires_grad = True
 
-		for param in model_init.Tmodel.features.parameters():
-			param.requires_grad = False
+	for param in model_init.Tmodel.features.parameters():
+		param.requires_grad = False
 
-		for param in model_init.Tmodel.features[8].parameters():
-			param.requires_grad = True
+	for param in model_init.Tmodel.features[8].parameters():
+		param.requires_grad = True
 
-		for param in model_init.Tmodel.features[10].parameters():
-			param.requires_grad = True
-
-		
-
-
-		print()
-		print("Initializing an Adam optimizer")
-		optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
-		
-
-		# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
+	for param in model_init.Tmodel.features[10].parameters():
+		param.requires_grad = True
 
 		
-		#Actually makes the changes to the model_init, so slightly redundant
-		print("Initializing the model to be trained")
-		model_init = initialize_new_model(model_init, num_classes, num_of_classes_old)
-		#print(model_init)
-		model_init.to(device)
-		start_epoch = 0
+
+
+	print()
+	print("Initializing an Adam optimizer")
+	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
+		
+
+	# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
+
+		
+	#Actually makes the changes to the model_init, so slightly redundant
+	print("Initializing the model to be trained")
+	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old)
+	#print(model_init)
+	model_init.to(device)
+	start_epoch = 0
 
 	#The training process format or LwF (Learning without Forgetting)
 	# Add the start epoch code 
@@ -205,8 +143,6 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 		print("Using the LwF approach")
 		for epoch in range(start_epoch, num_epochs):
-			since = time.time()
-			best_perform = 10e6
 			
 			print("Epoch {}/{}".format(epoch+1, num_epochs))
 			print("-"*20)
