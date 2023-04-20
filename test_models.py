@@ -147,8 +147,8 @@ def test_models():
 			#Test out the different auto encoder models and check their reconstruction error
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
-				#del labels
-				#del data
+
+
 
 				if (use_gpu):
 					input_data = input_data.to(device)
@@ -167,9 +167,9 @@ def test_models():
 				preds = model(input_to_ae)
 				loss = encoder_criterion(preds, input_to_ae)
 		
-				#del preds
-				#del input_data
-				#del input_to_ae
+
+
+
 
 				running_loss = running_loss + loss.item()
 
@@ -179,7 +179,7 @@ def test_models():
 				best_loss = model_loss
 				model_number = ae_number
 		
-			#del model
+
 
 
 		if(model_number == task_number):
@@ -212,7 +212,7 @@ def test_models():
 		print("Model test")
 		for data in tqdm(dset_loaders):
 			input_data, labels = data
-			#del data
+
 
 			if (use_gpu):
 				input_data = Variable(input_data.to(device))
@@ -238,9 +238,9 @@ def test_models():
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()
 
-			#del preds
-			#del input_data
-			#del labels
+
+
+
 
 		model_loss = running_loss/dset_size
 		model_accuracy = running_corrects.double()/dset_size

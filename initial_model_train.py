@@ -96,7 +96,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		for data in tqdm(dset_loaders):
 			input_data, labels = data
 
-			#del data
+
 
 			if (use_gpu):
 				input_data = Variable(input_data.to(device))
@@ -109,15 +109,15 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 			output = model_init(input_data)
 			#ref_output = ref_model(input_data)
 
-			#del input_data
+
 
 			optimizer.zero_grad()
 			#model_init.zero_grad()
 
 			loss = model_criterion(output, labels, flag = "CE")
 			
-			#del labels
-				#del output
+
+
 
 			loss.backward()
 			optimizer.step()
@@ -142,7 +142,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 	torch.save(model_init.state_dict(), os.path.join(mypath, "best_performing_model.pth"))		
 		
 
-	#del model_init
+
 
 
 
