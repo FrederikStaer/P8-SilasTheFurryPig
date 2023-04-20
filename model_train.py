@@ -142,6 +142,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			print("-"*20)
 			
 			running_loss = 0
+			running_distill_loss = 0
 			
 			#scales the optimizer every 10 epochs 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
@@ -168,29 +169,19 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				model_init.zero_grad()
 
 				# loss_1 only takes in the outputs from the nodes of the old classes 
-
 				loss1_output = output[:, :-num_classes]
 				loss2_output = output[:, -num_classes:]
 
 				#print()
 
-
-
 				loss_1 = model_criterion(loss1_output, ref_output, flag = "Distill")
 
 				
 				# loss_2 takes in the outputs from the nodes that were initialized for the new task
-				
 				loss_2 = model_criterion(loss2_output, labels, flag = "CE")
 
 
-
-				total_loss = loss_2 # alpha*loss_1 + loss_2
-
-
-
-
-				
+				total_loss = alpha*loss_1 + loss_2
 				total_loss.backward()
 				optimizer.step()
 
@@ -198,11 +189,14 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 					#print("error: NaN loss")
 					#output = model_init(input_data)
 				running_loss += total_loss.item()
+				running_distill_loss += alpha*loss_1.item()
 				
 			epoch_loss = running_loss/dset_size
+			epoch_distill_loss = running_distill_loss/dset_size
 
 
 			print('\nEpoch Loss:{}'.format(epoch_loss))
+			print('Epoch Distill Loss:{}'.format(epoch_distill_loss))
 
 			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')

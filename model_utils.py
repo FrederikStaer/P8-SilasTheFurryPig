@@ -227,10 +227,6 @@ def model_criterion(preds, labels, flag, T = 2):
 		
 
 
-		
-
-
-
 		loss = torch.sum(-1*preds*torch.log(labels), dim = 1)
 		batch_size = loss.size()[0]
 
