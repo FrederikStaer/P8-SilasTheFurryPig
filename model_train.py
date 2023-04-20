@@ -127,6 +127,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			model_init = model_init.load_state_dict(checkpoint['state_dict'])
 			
 			print("Loading the optimizer")
+			optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 			optimizer = optimizer.load_state_dict(checkpoint['optimizer'])
 			
 			print("Done")
