@@ -125,7 +125,7 @@ def test_models():
 
 	
 		dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = batch_size,
-														shuffle=True, num_workers=4)
+														shuffle=True, num_workers=2)
 
 		best_loss = 99999999999
 		model_number = 0
