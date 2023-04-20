@@ -64,18 +64,12 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	
 	#Check the number of models that already exist
 	num_ae = len(next(os.walk(destination))[1])
-	#num_ae = 0
-
-	#If task_number is less than num_ae it suggests that the directory had already been created
-	if (task_number <= num_ae):
-		#Keeping it consistent with the usage of num_ae throughout this file
-		num_ae = task_number-1
 
 	
 	print("Checking if a prior training file exists")
 	
 	#mypath is the path where the model is going to be stored
-	mypath = path + str(num_ae+1)
+	mypath = path + str(num_ae)
 
 
 	#Will have to create a new directory since it does not exist at the moment
