@@ -24,6 +24,7 @@ if __name__ == "__main__":
 	from encoder_train import *
 	from initial_model_train import *
 	from model_train import *
+	from model_train_consolidate import *
 	from data_utils.data_prep_mnist import *
 	from data_utils.data_prep_tin import *
 	from test_models import *
@@ -34,7 +35,7 @@ if __name__ == "__main__":
 	parser.add_argument("--batch_size",			type=int,   default=16,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
 	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
-	parser.add_argument('--num_epochs_model',	default=2,	type=int,		help='Number of epochs you want  model to train on')
+	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
@@ -47,6 +48,7 @@ if __name__ == "__main__":
 	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
+	parser.add_argument("--approach",			type=str,	default="expert gate",	help="Which approach to use ('expert gate' or 'consoligate')")
 
 	# Output options 
 	parser.add_argument("--sample_interval",	type=int,	default=5000,   help="Iters between image samples")
@@ -225,8 +227,11 @@ if __name__ == "__main__":
 				ae_idxs = list(reversed(range(1, num_ae+1)))
 				model_number, best_relatedness = get_related_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, cuda, ae_idxs)
 				relatedness_info = (model_number, best_relatedness)
-
-				train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
+				
+				if opt.approach == "expert gate":
+					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
+				if opt.approach == "consoligate":
+					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
 
 	if opt.mode == "test" or opt.mode == "run":
 		test_models()
