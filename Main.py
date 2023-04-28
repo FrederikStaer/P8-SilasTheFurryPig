@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
 			#Train the model
 			if(task_number == 1):
-				train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number,  lr = opt.lr)
+				train_model_1(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, args = opt, lr = opt.lr)
 			else: 
 				print("Determining the most related model")
 				path = os.getcwd()
@@ -232,9 +232,9 @@ if __name__ == "__main__":
 				relatedness_info = (model_number, best_relatedness)
 				
 				if opt.approach == "expert gate":
-					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
+					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 				if opt.approach == "consoligate":
-					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
+					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 
 	if opt.mode == "test" or opt.mode == "run":
 		test_models(opt)

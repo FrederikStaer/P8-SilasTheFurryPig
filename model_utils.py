@@ -183,7 +183,7 @@ def initialize_new_model(model_init, num_classes, num_of_classes_old, args):
 
 
 
-def model_criterion(preds, labels, flag, args, T = 2):
+def model_criterion(preds, labels, args, flag, T = 2):
 	"""
 		Temperature is used to produce softer values of probability and 
 		this parameter is used only when the flag option is set with the "Distill"

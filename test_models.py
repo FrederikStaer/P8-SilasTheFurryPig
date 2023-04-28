@@ -228,7 +228,7 @@ def test_models(args):
 			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
 			fitted_outputs = torch.zeros(outputs.shape[0], classes[task_number], dtype=outputs.dtype, device=outputs.device)
 			fitted_outputs[:, -classes[model_number-1]:] = outputs[:, -classes[model_number-1]:]
-			loss = model_criterion(fitted_outputs, labels, 'CE', args)
+			loss = model_criterion(fitted_outputs, labels, args, flag = 'CE')
 			
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()

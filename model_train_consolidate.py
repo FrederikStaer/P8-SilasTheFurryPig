@@ -16,7 +16,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, lr = 0.1, alpha = 0.01):
+def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 0.01):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -174,11 +174,11 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 				#print()
 
-				loss_1 = model_criterion(loss1_output, ref_output, flag = "Distill")
+				loss_1 = model_criterion(loss1_output, ref_output, args, flag = "Distill")
 
 				
 				# loss_2 takes in the outputs from the nodes that were initialized for the new task
-				loss_2 = model_criterion(loss2_output, labels, flag = "CE")
+				loss_2 = model_criterion(loss2_output, labels, args, flag = "CE")
 
 
 				total_loss = alpha*loss_1 + loss_2
@@ -253,7 +253,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 				model_init.zero_grad()
 				
 				#loss for new classes
-				loss = model_criterion(output[:, -num_classes:], labels, flag = 'CE')
+				loss = model_criterion(output[:, -num_classes:], labels, args, flag = 'CE')
 
 
 

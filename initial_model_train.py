@@ -22,7 +22,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, lr = 0.1, alpha = 0.01):
+def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, args, lr = 0.1, alpha = 0.01):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -114,7 +114,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 			optimizer.zero_grad()
 			#model_init.zero_grad()
 
-			loss = model_criterion(output, labels, flag = "CE")
+			loss = model_criterion(output, labels, args, flag = "CE")
 			
 
 
