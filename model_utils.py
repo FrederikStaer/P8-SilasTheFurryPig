@@ -12,6 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils, models
 from torch.autograd import Variable
 
+import copy
 import os
 import warnings
 import time
@@ -77,7 +78,7 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 	destination = os.path.join(path, "models", "autoencoders")
 	best_relatedness = -999
 	model_number = None
-	device = torch.device("cuda:0" if use_gpu else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and use_gpu else "cpu")
 	feature_extractor = feature_extractor.to(device)
 	rerror_comp = None
 
@@ -145,7 +146,7 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 
 
-def initialize_new_model(model_init, num_classes, num_of_classes_old):
+def initialize_new_model(model_init, num_classes, num_of_classes_old, args):
 	""" 
 	Inputs: 
 		1) model_init = A reference to the model which needs to be initialized
@@ -164,14 +165,14 @@ def initialize_new_model(model_init, num_classes, num_of_classes_old):
 
 	"""	
 
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
 
 	weight_info = model_init.Tmodel.classifier[-1].weight.data.to(device)
 	
 	weight_info = weight_info.to(device)
 	model_init.Tmodel.classifier[-1] = nn.Linear(model_init.Tmodel.classifier[-1].in_features, num_of_classes_old + num_classes)
 	
-	nn.init.kaiming_normal_(model_init.Tmodel.classifier[-1].weight, nonlinearity='sigmoid')
+	nn.init.kaiming_normal_(model_init.Tmodel.classifier[-1].weight, nonlinearity='relu')
 	
 	#kaiming_initilaization()
 	model_init.Tmodel.classifier[-1].weight.data[:-num_classes, :] = weight_info
@@ -182,13 +183,13 @@ def initialize_new_model(model_init, num_classes, num_of_classes_old):
 
 
 
-def model_criterion(preds, labels, flag, T = 2):
+def model_criterion(preds, labels, flag, args, T = 2):
 	"""
 		Temperature is used to produce softer values of probability and 
 		this parameter is used only when the flag option is set with the "Distill"
 		option
 	"""
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
 
 	preds = preds.to(device)
 	labels = labels.to(device)
@@ -210,6 +211,13 @@ def model_criterion(preds, labels, flag, T = 2):
 		preds = F.softmax(preds, dim = 1)
 		labels = F.softmax(labels, dim = 1)
 		
+		if preds[0][0] != preds[0][0]:
+			preds = torch.ones(preds.shape, dtype=preds.dtype, device=preds.device)
+			preds = F.softmax(preds, dim = 1)
+		if  labels[0][0] != labels[0][0]:
+			labels = torch.ones(labels.shape, dtype=labels.dtype, device=labels.device)
+			labels = F.softmax(labels, dim = 1)
+
 		preds = preds.pow(1/T)
 		labels = labels.pow(1/T)
 

@@ -41,7 +41,7 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 	"""
 	since = time.time()
 	best_perform = 10e6
-	device = torch.device("cuda:0" if use_gpu else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and use_gpu else "cpu")
 	
 	model_init = GeneralModelClass(num_classes)
 	model_init.to(device)

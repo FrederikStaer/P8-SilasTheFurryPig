@@ -29,13 +29,16 @@ if __name__ == "__main__":
 	from data_utils.data_prep_tin import *
 	from test_models import *
 
+	
+	#torch.autograd.set_detect_anomaly(True)
+
 	parser = argparse.ArgumentParser()
 	# Learning options
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
-	parser.add_argument("--batch_size",			type=int,   default=16,     help="Size of the batches")
+	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
-	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
+	parser.add_argument('--num_epochs_encoder', default=5,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_model',	default=50,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
@@ -234,4 +237,4 @@ if __name__ == "__main__":
 					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info,  lr = opt.lr)
 
 	if opt.mode == "test" or opt.mode == "run":
-		test_models()
+		test_models(opt)

@@ -39,14 +39,7 @@ from encoder_utils import *
 from model_train import *
 from model_utils import *
 
-def test_models():
-	parser = argparse.ArgumentParser(description='Test file')
-	#parser.add_argument('--task_number', default=1, type=int, help='Select the task you want to test out the architecture; choose from 1-4')
-	parser.add_argument('--use_gpu', default=True, type=bool, help = 'Set the flag if you wish to use the GPU')
-	parser.add_argument('--batch_size', default=16, type=int, help='Batch size you want to use whilst testing the model')
-
-	#get the arguments passed in 
-	args = parser.parse_args()
+def test_models(args):
 	use_gpu = args.use_gpu  and torch.cuda.is_available()
 	batch_size = args.batch_size
 	
@@ -103,7 +96,7 @@ def test_models():
 	#shuffle(task_number_list)
 
 	#set the device to be used and initialize the feature extractor to feed the data into the autoencoder
-	device = torch.device("cuda:0" if use_gpu else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and use_gpu else "cpu")
 	feature_extractor = Alexnet_FE(models.alexnet(pretrained=True))
 	feature_extractor.to(device)
 
@@ -233,7 +226,9 @@ def test_models():
 
 			#check over only the specific layer identified by the AE (similar to single head setting)
 			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
-			loss = model_criterion(outputs[:, -classes[model_number-1]:], labels, 'CE')
+			fitted_outputs = torch.zeros(outputs.shape[0], classes[task_number], dtype=outputs.dtype, device=outputs.device)
+			fitted_outputs[:, -classes[model_number-1]:] = outputs[:, -classes[model_number-1]:]
+			loss = model_criterion(fitted_outputs, labels, 'CE', args)
 			
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()

@@ -43,7 +43,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	"""	
 	(model_number, best_relatedness) = relatedness_info
 	
-	device = torch.device("cuda:0" if use_gpu else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() and use_gpu else "cpu")
 
 	path = os.getcwd()
 	destination = os.path.join(path, "models", "autoencoders")
@@ -160,11 +160,19 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				else:
 					input_data  = Variable(input_data)
 					labels = Variable(labels)
-				
+			
 				output = model_init(input_data)
 				ref_output = ref_model(input_data)
 
-
+				maybeNull = torch.sum(output)
+				if maybeNull != maybeNull:
+					#print every non-Null item
+					print("\nNull found in output. All non-null items: ")
+					for prediction in output:
+						for item in prediction:
+							if item == item:
+								print(item)
+				
 				optimizer.zero_grad()
 				model_init.zero_grad()
 
@@ -182,14 +190,23 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 
 				total_loss = alpha*loss_1 + loss_2
-				total_loss.backward()
-				optimizer.step()
+
+				backup_optim = copy.deepcopy(optimizer)
+				backup_model = copy.deepcopy(model_init)
+				if total_loss == total_loss and total_loss != float("inf"):
+					total_loss.backward()
+					optimizer.step()
+					test_null_output = model_init(input_data)
+					if test_null_output[0][0] != test_null_output[0][0]:
+						model_init = copy.deepcopy(backup_model)
+						optimizer = copy.deepcopy(backup_optim)
+					running_loss += total_loss.item()
+					running_distill_loss += alpha*loss_1.item()
 
 				#if total_loss.item() != total_loss.item():
 					#print("error: NaN loss")
 					#output = model_init(input_data)
-				running_loss += total_loss.item()
-				running_distill_loss += alpha*loss_1.item()
+				
 				
 			epoch_loss = running_loss/dset_size
 			epoch_distill_loss = running_distill_loss/dset_size
@@ -261,6 +278,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				loss.backward()
 				# Zero the gradients from the older classes
 				#model_init.Tmodel.classifier[-1].weight.grad[:-num_classes, :] = 0 
+
 				optimizer.step()
 
 				running_loss += loss.item()
