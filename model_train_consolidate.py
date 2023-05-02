@@ -74,7 +74,8 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 	#Will have to create a new directory since it does not exist at the moment
 	print("Creating the directory for the new model")
-	os.mkdir(mypath)
+	if(not os.path.exists(mypath)):
+		os.mkdir(mypath)
 
 
 	# Store the number of classes in the file for future use
@@ -122,7 +123,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 		
 	#Actually makes the changes to the model_init, so slightly redundant
 	print("Initializing the model to be trained")
-	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old)
+	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old, args)
 	#print(model_init)
 	model_init.to(device)
 	start_epoch = 0
@@ -132,88 +133,8 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	
 	if (best_relatedness > 0.85):
 
-		model_init.to(device)
-		ref_model.to(device)
-
-		print("Using the LwF approach")
-		for epoch in range(start_epoch, num_epochs):
-			
-			print("Epoch {}/{}".format(epoch+1, num_epochs))
-			print("-"*20)
-			
-			running_loss = 0
-			running_distill_loss = 0
-			
-			#scales the optimizer every 10 epochs 
-			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
-			model_init = model_init.train(True)
-			
-			for data in tqdm(dset_loaders):
-				input_data, labels = data
-
-
-
-				if (use_gpu):
-					input_data = Variable(input_data.to(device))
-					labels = Variable(labels.to(device)) 
-				
-				else:
-					input_data  = Variable(input_data)
-					labels = Variable(labels)
-				
-				output = model_init(input_data)
-				ref_output = ref_model(input_data)
-
-
-				optimizer.zero_grad()
-				model_init.zero_grad()
-
-				# loss_1 only takes in the outputs from the nodes of the old classes 
-				loss1_output = output[:, :-num_classes]
-				loss2_output = output[:, -num_classes:]
-
-				#print()
-
-				loss_1 = model_criterion(loss1_output, ref_output, args, flag = "Distill")
-
-				
-				# loss_2 takes in the outputs from the nodes that were initialized for the new task
-				loss_2 = model_criterion(loss2_output, labels, args, flag = "CE")
-
-
-				total_loss = alpha*loss_1 + loss_2
-				total_loss.backward()
-				optimizer.step()
-
-				#if total_loss.item() != total_loss.item():
-					#print("error: NaN loss")
-					#output = model_init(input_data)
-				running_loss += total_loss.item()
-				running_distill_loss += alpha*loss_1.item()
-				
-			epoch_loss = running_loss/dset_size
-			epoch_distill_loss = running_distill_loss/dset_size
-
-
-			print('\nEpoch Loss:{}'.format(epoch_loss))
-			print('Epoch Distill Loss:{}'.format(epoch_distill_loss))
-
-			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
-				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
-				torch.save({
-				'epoch': epoch,
-				'epoch_loss': epoch_loss, 
-				'model_state_dict': model_init.state_dict(),
-				'optimizer_state_dict': optimizer.state_dict(),
-
-				}, epoch_file_name)
-
-
-		torch.save(model_init.state_dict(), os.path.join(mypath, "best_performing_model.pth"))	
-		
-
-
-
+		#remove latest ae
+		shutil.rmtree(os.path.join(os.getcwd(), "models", "autoencoders", "autoencoder_" + str(num_ae)))
 	
 	#Process for finetuning the model
 	else:
