@@ -74,14 +74,8 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 	#Will have to create a new directory since it does not exist at the moment
 	print("Creating the directory for the new model")
-	os.mkdir(mypath)
-
-
-	# Store the number of classes in the file for future use
-	with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
-		input_to_txtfile = str(new_classes)
-		file1.write(input_to_txtfile)
-		file1.close()
+	if(not os.path.exists(mypath)):
+		os.mkdir(mypath)
 
 	# Load the most related model into memory
 	
@@ -137,6 +131,12 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 		#overwrite mypath - as we need to overwrite the model
 		mypath = path + str(model_number)
+
+		# Store the number of classes in the file for future use
+		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
+			input_to_txtfile = str(new_classes)
+			file1.write(input_to_txtfile)
+			file1.close()
 
 		model_init.to(device)
 		ref_model.to(device)
@@ -223,7 +223,12 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	
 	#Process for finetuning the model
 	else:
-		
+		# Store the number of classes in the file for future use
+		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
+			input_to_txtfile = str(new_classes)
+			file1.write(input_to_txtfile)
+			file1.close()
+
 		model_init.to(device)
 		print("Using the finetuning approach")
 		
