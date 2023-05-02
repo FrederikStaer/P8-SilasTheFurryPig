@@ -16,7 +16,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 0.01):
+def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 1):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -194,8 +194,19 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 
 				total_loss = alpha*loss_1 + loss_2
-				total_loss.backward()
-				optimizer.step()
+
+
+				backup_optim = copy.deepcopy(optimizer)
+				backup_model = copy.deepcopy(model_init)
+				if total_loss == total_loss and total_loss != float("inf"):
+					total_loss.backward()
+					optimizer.step()
+					test_null_output = model_init(input_data)
+					if test_null_output[0][0] != test_null_output[0][0]:
+						model_init = copy.deepcopy(backup_model)
+						optimizer = copy.deepcopy(backup_optim)
+					running_loss += total_loss.item()
+					running_distill_loss += alpha*loss_1.item()
 
 				#if total_loss.item() != total_loss.item():
 					#print("error: NaN loss")
