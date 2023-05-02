@@ -9,7 +9,7 @@ from torchvision import models
 from autoencoder import GeneralModelClass
 
 import copy
-
+import shutil
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'utils'))
 from model_utils import *
@@ -131,6 +131,12 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	# Add the start epoch code 
 	
 	if (best_relatedness > 0.85):
+
+		#remove latest ae
+		shutil.rmtree(path + num_ae)
+
+		#overwrite mypath - as we need to overwrite the model
+		mypath = path + model_number
 
 		model_init.to(device)
 		ref_model.to(device)
