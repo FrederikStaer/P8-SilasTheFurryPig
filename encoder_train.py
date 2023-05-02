@@ -46,8 +46,8 @@ def add_autoencoder(input_dims = 256*13*13, code_dims = 100, task_no = -1):
 	directory_path = os.path.join(model_path, "autoencoders")
 	if not os.path.exists(directory_path):
 		os.mkdir(directory_path)
-	#num_ae = len(next(os.walk(directory_path))[1])
-	store_path = os.path.join(directory_path, "autoencoder_"+str(task_no))
+	num_ae = len(next(os.walk(directory_path))[1]) + 1
+	store_path = os.path.join(directory_path, "autoencoder_"+str(num_ae))
 	if not os.path.exists(store_path):
 		os.mkdir(store_path)
 
