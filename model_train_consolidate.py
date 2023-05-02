@@ -122,7 +122,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 		
 	#Actually makes the changes to the model_init, so slightly redundant
 	print("Initializing the model to be trained")
-	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old)
+	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old, args)
 	#print(model_init)
 	model_init.to(device)
 	start_epoch = 0
@@ -133,10 +133,10 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	if (best_relatedness > 0.85):
 
 		#remove latest ae
-		shutil.rmtree(path + num_ae)
+		shutil.rmtree(os.path.join(os.getcwd(), "models", "autoencoders", "autoencoder_" + str(num_ae)))
 
 		#overwrite mypath - as we need to overwrite the model
-		mypath = path + model_number
+		mypath = path + str(model_number)
 
 		model_init.to(device)
 		ref_model.to(device)
