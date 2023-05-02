@@ -138,6 +138,12 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 			file1.write(input_to_txtfile)
 			file1.close()
 
+		# Store the associated tasks in the file for future use
+		with open(os.path.join(mypath, 'tasks.txt'), 'a') as file1:
+			input_to_txtfile = str(task_number) + ","
+			file1.write(input_to_txtfile)
+			file1.close()
+
 		model_init.to(device)
 		ref_model.to(device)
 
@@ -226,6 +232,12 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 		# Store the number of classes in the file for future use
 		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
 			input_to_txtfile = str(new_classes)
+			file1.write(input_to_txtfile)
+			file1.close()
+
+		# Store the associated tasks in the file for future use
+		with open(os.path.join(mypath, 'tasks.txt'), 'a') as file1:
+			input_to_txtfile = str(task_number) + ","
 			file1.write(input_to_txtfile)
 			file1.close()
 

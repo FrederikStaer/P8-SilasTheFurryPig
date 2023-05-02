@@ -45,7 +45,8 @@ def test_models(args):
 	
 	new_path = os.path.join(os.getcwd(), "models", "autoencoders")
 	num_ae = len(next(os.walk(new_path))[1])
-	task_number_list = [x for x in range(1,num_ae+1)]
+	task_number_list = [x for x in range(1,args.no_of_tasks+1)]
+	ae_number_list = [x for x in range(1,num_ae+1)]
 	#shuffle(task_number_list)
 
 	classes = []
@@ -125,7 +126,7 @@ def test_models(args):
 
 		
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
-		for ae_number in task_number_list:
+		for ae_number in ae_number_list:
 			print()
 			print("Autoencoder no. " + str(ae_number))
 			ae_path = os.path.join(encoder_path, "autoencoder_" + str(ae_number))
@@ -173,17 +174,29 @@ def test_models(args):
 				model_number = ae_number
 		
 
-
-
-		if(model_number == task_number):
-			print ("\nThe correct autoencoder has been found")
-
-		else:
-			print ("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
-
-
-		#Load the expert that has been found by this procedure into memory
 		trained_model_path = os.path.join(model_path, "model_" + str(model_number))
+
+		#find tasks associated with the model
+		file_name = os.path.join(trained_model_path, "tasks.txt") 
+		file_object = open(file_name, 'r')
+		file_text = file_object.read()
+		file_object.close()
+		model_task_list = file_text.split(",")
+		model_task_list = model_task_list[:-2]
+		model_task_list = [int(x) for x in model_task_list]
+		
+		#Used for getting the labels placed correctly
+		labels_model_offset = 0
+
+		if(task_number in model_task_list):
+			print("\nThe correct autoencoder has been found")
+			i = 0;
+			while(model_task_list[i] != task_number):
+				labels_model_offset += classes[model_task_list[i]]
+				i += 1;
+		else:
+			print("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
+
 
 		#Get the number of classes that this expert was exposed to
 		file_name = os.path.join(trained_model_path, "classes.txt") 
@@ -216,18 +229,13 @@ def test_models(args):
 				labels = Variable(labels)
 		
 			model.to(device)
+			labels = torch.add(labels, labels_model_offset)
 
 			outputs = model(input_data)
+			_, preds = torch.max(outputs, 1)
 
-		
-			#(currently not functional) for a more robust analysis check over the entire output layer (similar to multi head setting)
-			#_, preds = torch.max(outputs, 1
-			#loss = model_criterion(outputs, labels, 'CE')
-
-			#check over only the specific layer identified by the AE (similar to single head setting)
-			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
-			fitted_outputs = torch.zeros(outputs.shape[0], classes[task_number], dtype=outputs.dtype, device=outputs.device)
-			fitted_outputs[:, -classes[model_number-1]:] = outputs[:, -classes[model_number-1]:]
+			fitted_outputs = torch.zeros(outputs.shape[0], max(classes[task_number-1], outputs.shape[1]), dtype=outputs.dtype, device=outputs.device)
+			fitted_outputs[:, :outputs.shape[1]] = outputs
 			loss = model_criterion(fitted_outputs, labels, args, flag = 'CE')
 			
 			running_corrects += torch.sum(preds==labels.data)
