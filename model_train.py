@@ -110,12 +110,14 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		
 
 	# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
+	
+	print("Initializing an Adam optimizer")
+	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 
 		
 	#Actually makes the changes to the model_init, so slightly redundant
 	print("Initializing the model to be trained")
 	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old, args)
-	print("Initializing an Adam optimizer")
 
 	for param in model_init.Tmodel.classifier.parameters():
 		param.requires_grad = True
@@ -129,7 +131,6 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 	for param in model_init.Tmodel.features[10].parameters():
 		param.requires_grad = True
 
-	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 	#print(model_init)
 	model_init.to(device)
 	start_epoch = 0
@@ -150,6 +151,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			
 			running_loss = 0
 			running_distill_loss = 0
+			steps = 0
 			
 			#scales the optimizer every 10 epochs 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
@@ -201,11 +203,12 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 				backup_optim = copy.deepcopy(optimizer)
 				backup_model = copy.deepcopy(model_init)
 				if total_loss == total_loss and total_loss != float("inf"):
+					steps += 1
 					total_loss.backward()
 					optimizer.step()
 					test_null_output = model_init(input_data)
 					if test_null_output[0][0] != test_null_output[0][0]:
-						print("reverting step\n")
+						steps -= 1
 						model_init = copy.deepcopy(backup_model)
 						optimizer = copy.deepcopy(backup_optim)
 					running_loss += total_loss.item()
@@ -222,6 +225,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 			print('\nEpoch Loss:{}'.format(epoch_loss))
 			print('Epoch Distill Loss:{}'.format(epoch_distill_loss))
+			print("Steps taken: " + str(steps))
 
 			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
@@ -256,6 +260,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			model_init = model_init.train(True)
 			
 			running_loss = 0
+			steps = 0
 			
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
@@ -283,15 +288,17 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 
 				
+				total_loss = loss
 
 				backup_optim = copy.deepcopy(optimizer)
 				backup_model = copy.deepcopy(model_init)
 				if total_loss == total_loss and total_loss != float("inf"):
+					steps += 1
 					total_loss.backward()
 					optimizer.step()
 					test_null_output = model_init(input_data)
 					if test_null_output[0][0] != test_null_output[0][0]:
-						print("reverting step\n")
+						steps -= 1
 						model_init = copy.deepcopy(backup_model)
 						optimizer = copy.deepcopy(backup_optim)
 					running_loss += total_loss.item()
@@ -300,6 +307,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			epoch_loss = running_loss/dset_size
 
 			print('\nEpoch Loss:{}'.format(epoch_loss))
+			print("Steps taken: " + str(steps))
 
 			if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs -1):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
