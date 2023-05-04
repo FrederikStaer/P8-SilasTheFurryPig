@@ -51,7 +51,7 @@ if __name__ == "__main__":
 	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
-	parser.add_argument("--approach",			type=str,	default="consoligate",	help="Which approach to use ('expert gate' or 'consoligate')")
+	parser.add_argument("--approach",			type=str,	default="expert gate",	help="Which approach to use ('expert gate' or 'consoligate')")
 
 	# Output options 
 	parser.add_argument("--sample_interval",	type=int,	default=5000,   help="Iters between image samples")

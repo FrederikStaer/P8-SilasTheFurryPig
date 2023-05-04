@@ -79,6 +79,12 @@ def train_model_1(num_classes, feature_extractor, encoder_criterion, dset_loader
 		file1.write(input_to_txtfile)
 		file1.close()
 
+	# Store the associated tasks in the file for future use
+	with open(os.path.join(mypath, 'tasks.txt'), 'a') as file1:
+		input_to_txtfile = str(task_number) + ","
+		file1.write(input_to_txtfile)
+		file1.close()
+
 	for epoch in range(num_epochs):
 		since = time.time()
 		best_perform = 10e6

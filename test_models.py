@@ -182,7 +182,7 @@ def test_models(args):
 		file_text = file_object.read()
 		file_object.close()
 		model_task_list = file_text.split(",")
-		model_task_list = model_task_list[:-2]
+		model_task_list = model_task_list[:-1]
 		model_task_list = [int(x) for x in model_task_list]
 		
 		#Used for getting the labels placed correctly
