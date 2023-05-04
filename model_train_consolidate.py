@@ -16,7 +16,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 1):
+def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 0.02):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -99,6 +99,9 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 	# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
 
+	print("Initializing an Adam optimizer")
+	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
+
 		
 	#Actually makes the changes to the model_init, so slightly redundant
 	print("Initializing the model to be trained")
@@ -116,8 +119,6 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	for param in model_init.Tmodel.features[10].parameters():
 		param.requires_grad = True
 
-	print("Initializing an Adam optimizer")
-	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
 	#print(model_init)
 	model_init.to(device)
 	start_epoch = 0
@@ -156,6 +157,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 			
 			running_loss = 0
 			running_distill_loss = 0
+			steps = 0
 			
 			#scales the optimizer every 10 epochs 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
@@ -200,14 +202,15 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 				backup_optim = copy.deepcopy(optimizer)
 				backup_model = copy.deepcopy(model_init)
 				if total_loss == total_loss and total_loss != float("inf"):
+					steps += 1
 					total_loss.backward()
 					optimizer.step()
 					test_null_output = model_init(input_data)
 					if test_null_output[0][0] != test_null_output[0][0]:
+						steps -= 1
 						model_init = copy.deepcopy(backup_model)
 						optimizer = copy.deepcopy(backup_optim)
 					running_loss += total_loss.item()
-					running_distill_loss += alpha*loss_1.item()
 
 				#if total_loss.item() != total_loss.item():
 					#print("error: NaN loss")
@@ -221,6 +224,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 			print('\nEpoch Loss:{}'.format(epoch_loss))
 			print('Epoch Distill Loss:{}'.format(epoch_distill_loss))
+			print("Steps taken: " + str(steps))
 
 			if(epoch != 0 and epoch != num_epochs-1 and (epoch+1) % 10 == 0):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
@@ -290,13 +294,21 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 				#loss for new classes
 				loss = model_criterion(output[:, -num_classes:], labels, args, flag = 'CE')
 
+				
+				total_loss = loss
 
-
-
-				loss.backward()
-				# Zero the gradients from the older classes
-				#model_init.Tmodel.classifier[-1].weight.grad[:-num_classes, :] = 0 
-				optimizer.step()
+				backup_optim = copy.deepcopy(optimizer)
+				backup_model = copy.deepcopy(model_init)
+				if total_loss == total_loss and total_loss != float("inf"):
+					steps += 1
+					total_loss.backward()
+					optimizer.step()
+					test_null_output = model_init(input_data)
+					if test_null_output[0][0] != test_null_output[0][0]:
+						steps -= 1
+						model_init = copy.deepcopy(backup_model)
+						optimizer = copy.deepcopy(backup_optim)
+					running_loss += total_loss.item()
 
 				running_loss += loss.item()
 				

@@ -302,7 +302,6 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 						model_init = copy.deepcopy(backup_model)
 						optimizer = copy.deepcopy(backup_optim)
 					running_loss += total_loss.item()
-					running_distill_loss += alpha*loss_1.item()
 				
 			epoch_loss = running_loss/dset_size
 
