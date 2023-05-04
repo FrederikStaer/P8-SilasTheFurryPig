@@ -153,7 +153,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 			
 			#scales the optimizer every 10 epochs 
 			optimizer = exp_lr_scheduler(optimizer, epoch, lr)
-			model_init = model_init.train(True)
+			#model_init = model_init.train(True)
 			
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
@@ -205,6 +205,7 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 					optimizer.step()
 					test_null_output = model_init(input_data)
 					if test_null_output[0][0] != test_null_output[0][0]:
+						print("reverting step\n")
 						model_init = copy.deepcopy(backup_model)
 						optimizer = copy.deepcopy(backup_optim)
 					running_loss += total_loss.item()
@@ -281,14 +282,20 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 
 
 
+				
 
-				loss.backward()
-				# Zero the gradients from the older classes
-				#model_init.Tmodel.classifier[-1].weight.grad[:-num_classes, :] = 0 
-
-				optimizer.step()
-
-				running_loss += loss.item()
+				backup_optim = copy.deepcopy(optimizer)
+				backup_model = copy.deepcopy(model_init)
+				if total_loss == total_loss and total_loss != float("inf"):
+					total_loss.backward()
+					optimizer.step()
+					test_null_output = model_init(input_data)
+					if test_null_output[0][0] != test_null_output[0][0]:
+						print("reverting step\n")
+						model_init = copy.deepcopy(backup_model)
+						optimizer = copy.deepcopy(backup_optim)
+					running_loss += total_loss.item()
+					running_distill_loss += alpha*loss_1.item()
 				
 			epoch_loss = running_loss/dset_size
 
