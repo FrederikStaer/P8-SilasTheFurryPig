@@ -91,6 +91,19 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 
 	#print(ref_model)
 
+		
+
+
+	print()
+		
+
+	# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
+
+		
+	#Actually makes the changes to the model_init, so slightly redundant
+	print("Initializing the model to be trained")
+	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old, args)
+
 	for param in model_init.Tmodel.classifier.parameters():
 		param.requires_grad = True
 
@@ -103,20 +116,8 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	for param in model_init.Tmodel.features[10].parameters():
 		param.requires_grad = True
 
-		
-
-
-	print()
 	print("Initializing an Adam optimizer")
 	optimizer = optim.Adam(model_init.Tmodel.parameters(), lr = 0.003, weight_decay= 0.0001)
-		
-
-	# Reference model to compute the soft scores for the LwF(Learning without Forgetting) method
-
-		
-	#Actually makes the changes to the model_init, so slightly redundant
-	print("Initializing the model to be trained")
-	model_init = initialize_new_model(model_init, num_classes, num_of_classes_old, args)
 	#print(model_init)
 	model_init.to(device)
 	start_epoch = 0
