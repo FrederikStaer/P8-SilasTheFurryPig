@@ -49,10 +49,8 @@ To get started we need to install some dependencies. This can be done with the f
 
 Note: On other OS's than Linux, packages might be different (such as PyTorch), in which case consult the developers website for correct installation.
 
-pytorch, gdown, tqdm
-
 ```
-pip install -r requirements.txt
+pip install pytorch gdown tqdm
 ```
 
 
@@ -72,31 +70,9 @@ where [mode] is one of the modes listed above
 
 ### Settings
 
-You can change the default dataset (and much more!) by changing the string in default in Main.py to another dataset in the same folder 
-
-```python
-parser.add_argument("--dataset",			type=str,	default="nations",	help="Which dataset folder to use as input")
-```
-
 If you do not want the nations dataset or if you are offline, the download can be disabled with the following option:
 ```python
-opt.dataset_download = False
-```
-
-You can also change the hyperparameter search space and more such as run modes parameters in Main.py
-```python
-#--- Search space settings
-# Learning rate
-tune_lr_min = 1e-4 #default: 1e-4
-tune_lr_max = 1e-1 #default: 1e-1
-
-tune_batch_sizes = [16, 32, 64, 128, 256] #default: [16, 32, 64, 128, 256]
-tune_latent_dims = [32, 64, 128, 256, 512] #default: [32, 64, 128, 256, 512]
-
-tune_n_critics = [1, 2, 3] #default: [1, 2, 3]
-
-tune_f_loss_min_min = 1e-6 #default: 1e-6
-tune_f_loss_min_max = 1e-1 #default: 1e-1
+parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 ```
 
 ## Paper
