@@ -83,6 +83,12 @@ def train_model(num_classes, feature_extractor, encoder_criterion, dset_loaders,
 		file1.write(input_to_txtfile)
 		file1.close()
 
+	# Store the associated tasks in the file for future use
+	with open(os.path.join(mypath, 'tasks.txt'), 'a') as file1:
+		input_to_txtfile = str(task_number) + ","
+		file1.write(input_to_txtfile)
+		file1.close()
+
 	# Load the most related model into memory
 	
 	print("Loading the most related model")

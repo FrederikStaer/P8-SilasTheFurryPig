@@ -176,28 +176,6 @@ def test_models(args):
 
 		trained_model_path = os.path.join(model_path, "model_" + str(model_number))
 
-		#find tasks associated with the model
-		file_name = os.path.join(trained_model_path, "tasks.txt") 
-		file_object = open(file_name, 'r')
-		file_text = file_object.read()
-		file_object.close()
-		model_task_list = file_text.split(",")
-		model_task_list = model_task_list[:-1]
-		model_task_list = [int(x) for x in model_task_list]
-		
-		#Used for getting the labels placed correctly
-		labels_model_offset = 0
-
-		if(task_number in model_task_list):
-			print("\nThe correct autoencoder has been found")
-			i = 0;
-			while(model_task_list[i] != task_number):
-				labels_model_offset += classes[model_task_list[i]]
-				i += 1;
-		else:
-			print("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
-
-
 		#Get the number of classes that this expert was exposed to
 		file_name = os.path.join(trained_model_path, "classes.txt") 
 		file_object = open(file_name, 'r')
@@ -209,6 +187,36 @@ def test_models(args):
 
 		model = GeneralModelClass(num_of_classes)
 		model.load_state_dict(torch.load(os.path.join(trained_model_path, 'best_performing_model.pth')))
+		
+		#Used for getting the labels placed correctly
+		labels_model_offset = 0
+		model_task_list = []
+
+		if(args.approach == "consoligate"):
+			#find tasks associated with the model
+			file_name = os.path.join(trained_model_path, "tasks.txt") 
+			file_object = open(file_name, 'r')
+			file_text = file_object.read()
+			file_object.close()
+			model_task_list = file_text.split(",")
+			model_task_list = model_task_list[:-1]
+			model_task_list = [int(x) for x in model_task_list]
+		else:
+			model_task_list = [model_number]
+
+		
+		if(task_number in model_task_list):
+			print("\nThe correct autoencoder has been found")
+			if(args.approach == "consoligate"):
+				i = 0;
+				while(model_task_list[i] != task_number):
+					labels_model_offset += classes[model_task_list[i]]
+					i += 1;
+			else:
+				labels_model_offset = num_of_classes - classes[model_task_list[0]-1]
+		else:
+			print("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
+
 
 		#initialize the results statistics
 		running_loss = 0
