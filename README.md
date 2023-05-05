@@ -1,4 +1,4 @@
-# ExPort(Expert Port) - synonym with Expert Gate
+# ExPort(Expert Port)
 
 ```
 oooooooooooo             ooooooooo                               
@@ -9,6 +9,8 @@ oooooooooooo             ooooooooo
  888       o   o8  88b    888         888   888  888       888   
 o888ooooood8 o88    888o o888o         Y8bod8P  d888b       888
 ```
+
+Where port is a synonym for gate
 
 ExPort is a performance focused derivative of Expert Gate, a dynamic architecture to eliminate catastrophic forgetting.
 
