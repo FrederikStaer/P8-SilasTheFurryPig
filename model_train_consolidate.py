@@ -16,7 +16,7 @@ from model_utils import *
 
 from tqdm import tqdm
 
-def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 0.02):
+def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, dset_loaders, dset_size, num_epochs, use_gpu, task_number, relatedness_info, args, lr = 0.1, alpha = 0.01):
 	""" 
 	Inputs: 
 		1) num_classes = The number of classes in the new task  
@@ -270,6 +270,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 			model_init = model_init.train(True)
 			
 			running_loss = 0
+			steps = 0
 			
 			for data in tqdm(dset_loaders):
 				input_data, labels = data
@@ -315,6 +316,7 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 			epoch_loss = running_loss/dset_size
 
 			print('\nEpoch Loss:{}'.format(epoch_loss))
+			print("Steps taken: " + str(steps))
 
 			if(epoch != 0 and (epoch+1) % 5 == 0 and epoch != num_epochs -1):
 				epoch_file_name = os.path.join(mypath, str(epoch+1)+'.pth.tar')
