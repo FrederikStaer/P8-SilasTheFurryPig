@@ -9,10 +9,6 @@ oooooooooooo             ooooooooo
  888       o   o8  88b    888         888   888  888       888   
 o888ooooood8 o88    888o o888o         Y8bod8P  d888b       888
 ```
-                                                                 
-                                                           
-                                                           
-                                                           
 
 ExPort is a performance focused derivative of Expert Gate, a dynamic architecture to eliminate catastrophic forgetting.
 
@@ -38,7 +34,7 @@ Multiple modes to run the dataset
    - run   - both trains and tests the model
 
 ## Requirements
-   - Python 3.7 (other versions might work but have not been tested)
+   - Python 3.7.9 (other versions might work but have not been tested)
    - Preferabily one or more Nvidia GPUs
 
 
@@ -46,8 +42,6 @@ Multiple modes to run the dataset
 
 ### Setup
 To get started we need to install some dependencies. This can be done with the following command.
-
-Note: On other OS's than Linux, packages might be different (such as PyTorch), in which case consult the developers website for correct installation.
 
 ```
 pip install pytorch gdown tqdm
@@ -69,7 +63,6 @@ where [mode] is one of the modes listed above
 
 
 ### Settings
-
 If you do not want the nations dataset or if you are offline, the download can be disabled with the following option:
 ```python
 parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
@@ -85,6 +78,8 @@ We are a group of 8th semester Computer Science students from Aalborg University
 Our thanks goes out to these libraries and datasets
 [Expert Gate](https://github.com/rahafaljundi/Expert-Gate) and their [paper](https://arxiv.org/pdf/1611.06194.pdf) for the inspiration of the project
 
+[Pytorch implementation of Expert Gate](https://github.com/wannabeOG/ExpertNet-Pytorch)
+
 [Pytorch](https://github.com/pytorch/pytorch) and their [paper](https://arxiv.org/abs/1912.01703) for providing a general framework for machine learning
 
 [Mnist](https://drive.google.com/uc?id=1F6xICWB2ZqUouf274xJViMmMvLKC39fA) Mnist Dataset
@@ -94,7 +89,7 @@ Our thanks goes out to these libraries and datasets
 
 
 ## Licence
-Copyright 2022 Anders Martin Hansen, Frederik Stær, Frederik Marinus Trudslev, Silas Oliver Torup Bachmann
+Copyright 2023 Anders Martin Hansen, Frederik Stær, Frederik Marinus Trudslev, Silas Oliver Torup Bachmann
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
