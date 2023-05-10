@@ -245,6 +245,20 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 	
 	#Process for finetuning the model
 	else:
+		#Path to load previous tasks seen from
+		mypath = path + str(model_number)
+		model_task_list = []
+		with open(os.path.join(mypath, 'tasks.txt'), 'r') as file1:
+			#find tasks associated with the model
+			file_text = file1.read()
+			file1.close()
+			model_task_list = file_text.split(",")
+			model_task_list = model_task_list[:-1]
+			model_task_list = [int(x) for x in model_task_list]
+
+		#Path to store at
+		mypath = path + str(num_ae)
+
 		# Store the number of classes in the file for future use
 		with open(os.path.join(mypath, 'classes.txt'), 'w') as file1:
 			input_to_txtfile = str(new_classes)
@@ -252,8 +266,13 @@ def train_model_consolidate(num_classes, feature_extractor, encoder_criterion, d
 			file1.close()
 
 		# Store the associated tasks in the file for future use
-		with open(os.path.join(mypath, 'tasks.txt'), 'a') as file1:
-			input_to_txtfile = str(task_number) + ","
+		with open(os.path.join(mypath, 'tasks.txt'), 'w') as file1:
+			input_to_txtfile = ""
+			#text for prior seen tasks
+			for ae_num in model_task_list:
+				input_to_txtfile += str(ae_num) + ","
+			#text for new task
+			input_to_txtfile += str(task_number) + ","
 			file1.write(input_to_txtfile)
 			file1.close()
 

@@ -210,10 +210,10 @@ def test_models(args):
 			if(args.approach == "consoligate"):
 				i = 0;
 				while(model_task_list[i] != task_number):
-					labels_model_offset += classes[model_task_list[i]]
+					labels_model_offset += classes[model_task_list[i]-1]
 					i += 1;
 			else:
-				labels_model_offset = num_of_classes - classes[model_task_list[0]-1]
+				labels_model_offset = num_of_classes - classes[model_task_list[-1]-1]
 		else:
 			print("\nIncorrect routing, wrong model has been selected (selected model " + str(model_number) + ")")
 
