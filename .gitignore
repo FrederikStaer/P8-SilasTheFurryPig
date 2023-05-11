@@ -7,6 +7,7 @@
 Data/
 models/
 results.txt
+relatedness_matrix.txt
 
 # User-specific files
 *.rsuser

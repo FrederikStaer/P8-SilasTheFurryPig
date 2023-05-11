@@ -424,7 +424,8 @@ def find_autoencoder_clusters(graph):
 		beta_matrix = np.zeros((n, n))
 		for i in range(n):
 			for j in range(n):
-				beta_matrix[i][j] = edge_shortest_paths[i][j] / num_shortest_paths[i][j]
+				if num_shortest_paths[i][j] != 0:
+					beta_matrix[i][j] = edge_shortest_paths[i][j] / num_shortest_paths[i][j]
 
 		return beta_matrix
 	
@@ -449,8 +450,7 @@ def find_autoencoder_clusters(graph):
 			(max_i, max_j) = np.unravel_index(np.argmax(beta_values, axis=None), beta_values.shape)
 			graph[max_i][max_j] = 0
 			new_clusters = get_clusters(graph)
-			if len(new_clusters) != len(clusters):
-				clusters = new_clusters
+			clusters = new_clusters
 
 		return clusters
 
