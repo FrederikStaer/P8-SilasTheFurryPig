@@ -15,6 +15,7 @@ if __name__ == "__main__":
 	from tqdm import tqdm
 	from multiprocessing import freeze_support
 	import shutil
+	import tracemalloc
 
 	import torchvision.datasets as datasets
 	import torchvision.models as models
@@ -35,10 +36,10 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	# Learning options
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
-	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
+	parser.add_argument("--batch_size",			type=int,   default=16,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=5,	type=int,		help='Number of epochs you want the encoder model to train on')
-	parser.add_argument('--num_epochs_model',	default=50,	type=int,		help='Number of epochs you want  model to train on')
+	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
@@ -138,7 +139,6 @@ if __name__ == "__main__":
 		])
 	}
 
-
 	#Initial model 
 	pretrained_alexnet = models.alexnet(pretrained = True)
 
@@ -154,9 +154,11 @@ if __name__ == "__main__":
 		if(os.path.exists(expert_dir)):
 			shutil.rmtree(expert_dir)
 
-		#start training
+		# start monitoring the time and memory usage
+		trainStart = datetime.now()
+		tracemalloc.start()
+
 		for task_number in range(1, opt.no_of_tasks+1):
-	
 			print("Task Number {}".format(task_number))
 			data_path = os.path.join(os.getcwd(), "Data")
 			encoder_path = os.path.join(os.getcwd(), "models", "autoencoders")
@@ -236,5 +238,25 @@ if __name__ == "__main__":
 				if opt.approach == "consoligate":
 					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 
+
+		print("Peak memory usage in training: " + str(tracemalloc.get_traced_memory()))
+		tracemalloc.stop()
+		trainEnd = datetime.now()
+		trainTime = (trainEnd - trainStart).total_seconds()
+		print("Training time: " + "{:.0f}".format(trainTime) + " seconds")
+
 	if opt.mode == "test" or opt.mode == "run":
+
+		# start monitoring the memory usage and time
+		tracemalloc.start()
+		testStart = datetime.now()
+
 		test_models(opt)
+
+		testEnd = datetime.now()
+		testTime = (testEnd - testStart).total_seconds()
+		print("Testing time: " + "{:.0f}".format(testTime) + " seconds")
+
+		print("\n Highest memory usage in testing:" + tracemalloc.get_traced_memory())
+		tracemalloc.stop()
+
