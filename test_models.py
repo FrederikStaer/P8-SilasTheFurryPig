@@ -349,12 +349,6 @@ def find_autoencoder_clusters(graph):
 				if distance_matrix[i][j] > (distance_matrix[i][k] + distance_matrix[k][j]):
 					distance_matrix[i][j] = (distance_matrix[i][k] + distance_matrix[k][j])
 
-	#Make adjecency dictionary for establishing the possible paths	
-	adjList = defaultdict(list)
-	for i in range(n):
-		for j in range(n):
-			if graph[i][j] != 0:
-				adjList[i].append(j)
 
 	#Function for finding the paths to make a list of these
 	def paths(graph, v):
@@ -375,7 +369,14 @@ def find_autoencoder_clusters(graph):
 		yield from search()
 
 
-	def calc_betas(adjList):
+	def calc_betas(graph):
+		#Make adjecency dictionary for establishing the possible paths	
+		adjList = defaultdict(list)
+		for i in range(n):
+			for j in range(n):
+				if graph[i][j] != 0:
+					adjList[i].append(j)
+
 		#Make a list of all possible paths in the graph	
 		all_paths = []
 		for i in range(n):
@@ -426,11 +427,11 @@ def find_autoencoder_clusters(graph):
 
 		return clusters
 					
-	def newman_girvan(graph, adjList):
+	def newman_girvan(graph):
 		clusters = get_clusters(graph)
 	
 		while(len(clusters) < sqrt(n)):
-			beta_values = calc_betas(adjList)
+			beta_values = calc_betas(graph)
 			(max_i, max_j) = np.unravel_index(np.argmax(beta_values, axis=None), beta_values.shape)
 			graph[max_i][max_j] = 0
 			new_clusters = get_clusters(graph)
@@ -438,7 +439,7 @@ def find_autoencoder_clusters(graph):
 
 		return clusters
 
-	clusters = newman_girvan(graph, adjList)
+	clusters = newman_girvan(graph)
 	final_clusters = [[x+1 for x in cluster] for cluster in clusters]
 
 	return final_clusters
