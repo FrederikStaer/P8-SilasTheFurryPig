@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
 	# General options
 	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
-	parser.add_argument("--use_gpu",			type=str,	default="False",	help="Use GPU for training? (cuda)")
+	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
 	parser.add_argument("--approach",			type=str,	default="export",	help="Which approach to use ('expert gate', 'consoligate' or 'export')")
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 		if os.path.exists(os.path.join(path, 'relatedness_matrix.txt')):
 			os.remove("relatedness_matrix.txt")
 
-		#Print relateness_vector for first autoencoder
+		#Write relateness_vector for first autoencoder
 		with open(os.path.join(path, 'relatedness_matrix.txt'), 'a') as f:
 			f.write("[0]\n")
 		f.close()
@@ -239,9 +239,8 @@ if __name__ == "__main__":
 				ae_idxs = list(reversed(range(1, num_ae+1)))
 				model_number, best_relatedness = get_related_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, cuda, ae_idxs)
 				relatedness_info = (model_number, best_relatedness)
-				
-				if opt.approach == "expert gate":
-					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
+
+				train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 				
 	if opt.mode == "test" or opt.mode == "run":
 		test_models(opt)

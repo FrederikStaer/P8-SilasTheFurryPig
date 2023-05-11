@@ -162,7 +162,7 @@ def test_models(args):
 			
 			#Find best cluster
 			cluster_number = []
-			for i in range(clusters):
+			for i in range(len(clusters)):
 				print()
 				print("Cluster no. " + str(i))
 				ae_path = os.path.join(encoder_path, "autoencoder_" + str(clusters[i][0]))
@@ -206,6 +206,7 @@ def test_models(args):
 
 			task_number_list = clusters[cluster_number]
 			
+			best_loss = 99999999999
 
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
 		for ae_number in task_number_list:
@@ -305,15 +306,12 @@ def test_models(args):
 
 			#check over only the specific layer identified by the AE (similar to single head setting)
 			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
-			fitted_outputs = torch.zeros(outputs.shape[0], classes[task_number], dtype=outputs.dtype, device=outputs.device)
+			fitted_outputs = torch.zeros(outputs.shape[0], max(classes[task_number-1], outputs.shape[1]), dtype=outputs.dtype, device=outputs.device)
 			fitted_outputs[:, -classes[model_number-1]:] = outputs[:, -classes[model_number-1]:]
 			loss = model_criterion(fitted_outputs, labels, args, flag = 'CE')
 			
 			running_corrects += torch.sum(preds==labels.data)
 			running_loss = running_loss + loss.item()
-
-
-
 
 
 		model_loss = running_loss/dset_size
@@ -357,10 +355,6 @@ def find_autoencoder_clusters(graph):
 		for j in range(n):
 			if graph[i][j] != 0:
 				adjList[i].append(j)
-			
-		
-	newman_girvan(graph, adjList)
-
 
 	#Function for finding the paths to make a list of these
 	def paths(graph, v):
@@ -419,33 +413,36 @@ def find_autoencoder_clusters(graph):
 		return beta_matrix
 	
 	def get_clusters(graph):
-		clusters = [[i] for i in range(len(graph))]
+		clusters = [[i] for i in range(graph.shape[0])]
 		for i in range(n):
 			for j in range(n):
 				if graph[i][j] == 1:
 					#Connect the clusters
-					cluster_i_j = np.ndarray.flatten([x for x in clusters if i in x or j in x])
-					other_clusters = [x for x in clusters if not(i in x or j in x)]
-					clusters = other_clusters.append(cluster_i_j)
+					cluster_i_j = [x for x in clusters if i in x or j in x]
+					cluster_i_j = [item for sublist in cluster_i_j for item in sublist]
+					clusters = [x for x in clusters if not(i in x or j in x)]
+					clusters.append(cluster_i_j)
 
 		return clusters
 					
 	def newman_girvan(graph, adjList):
-		clusters = [[i for i in range(len(graph))]]
-		t = 0
+		clusters = get_clusters(graph)
 	
-		while(t < sqrt(n)):
+		while(len(clusters) < sqrt(n)):
 			beta_values = calc_betas(adjList)
 			(max_i, max_j) = np.unravel_index(np.argmax(beta_values, axis=None), beta_values.shape)
 			graph[max_i][max_j] = 0
 			new_clusters = get_clusters(graph)
 			if len(new_clusters) != len(clusters):
-				t += 1
 				clusters = new_clusters
 
 		return clusters
 
-	return newman_girvan(graph, adjList)
+	clusters = newman_girvan(graph, adjList)
+	final_clusters = [[x+1 for x in cluster] for cluster in clusters]
+
+	return final_clusters
+
 
 
 
