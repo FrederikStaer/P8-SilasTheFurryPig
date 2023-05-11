@@ -147,12 +147,6 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 		f.write(str(relatedness_vector) + "\n")
 	f.close()
 
-	with open(relatedness_matrix_file_name) as f:
-		lines = f.readlines()
-	f.close()
-
-	print(lines)
-
 	print("The Model number is ", model_number)
 	print("The best relatedness is ", best_relatedness)
 
