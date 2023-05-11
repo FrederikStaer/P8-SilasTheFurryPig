@@ -17,6 +17,7 @@ import os
 import warnings
 import time
 import sys
+import numpy as np
 
 from pathlib import Path
 path = Path(os.getcwd())
@@ -81,9 +82,11 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 	device = torch.device("cuda:0" if torch.cuda.is_available() and use_gpu else "cpu")
 	feature_extractor = feature_extractor.to(device)
 	rerror_comp = None
+	relatedness_vector = [0]
 
 	for i in ae_idxs:
 		running_loss = 0
+
 
 		print("testing AE no. " + str(i))	
 		
@@ -132,17 +135,28 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 			relatedness = task_metric(running_loss, rerror_comp)
 			print("\nae loss: " + str(running_loss) + ", relatedness: " + str(relatedness))
 			
+			relatedness_vector.append(relatedness)
+
 			if (relatedness > best_relatedness):
 				best_relatedness = relatedness
 				model_number = (i)
-	
 
 
+	relatedness_matrix_file_name = os.path.join(path, 'relatedness_matrix.txt')
+	with open(relatedness_matrix_file_name, 'a') as f:
+		f.write(str(relatedness_vector) + "\n")
+	f.close()
+
+	with open(relatedness_matrix_file_name) as f:
+		lines = f.readlines()
+	f.close()
+
+	print(lines)
 
 	print("The Model number is ", model_number)
 	print("The best relatedness is ", best_relatedness)
 
-	return model_number, best_relatedness 
+	return model_number, best_relatedness
 
 
 

@@ -48,10 +48,10 @@ if __name__ == "__main__":
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
-	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
+	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
+	parser.add_argument("--use_gpu",			type=str,	default="False",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
-	parser.add_argument("--approach",			type=str,	default="consoligate",	help="Which approach to use ('expert gate' or 'consoligate')")
+	parser.add_argument("--approach",			type=str,	default="export",	help="Which approach to use ('expert gate', 'consoligate' or 'export')")
 
 	# Output options 
 	parser.add_argument("--sample_interval",	type=int,	default=5000,   help="Iters between image samples")
@@ -93,6 +93,15 @@ if __name__ == "__main__":
 		print("Downloading TIN dataset")
 		download_tin(workDir)
 
+	if opt.mode != "test":
+		#Delete relatedness_matrix if it exists
+		if os.path.exists(os.path.join(path, 'relatedness_matrix.txt')):
+			os.remove("relatedness_matrix.txt")
+
+		#Print relateness_vector for first autoencoder
+		with open(os.path.join(path, 'relatedness_matrix.txt'), 'a') as f:
+			f.write("[0]\n")
+		f.close()
 
 	# Seed
 	seed = torch.Generator().seed()
