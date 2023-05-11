@@ -25,6 +25,7 @@ import argparse
 import numpy as np
 from random import shuffle
 import os
+from math import sqrt
 
 import copy
 from autoencoder import *
@@ -32,6 +33,7 @@ from autoencoder import *
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'utils'))
 from tqdm import tqdm
+from collections import defaultdict
 
 from encoder_train import *
 from encoder_utils import *
@@ -100,6 +102,39 @@ def test_models(args):
 	feature_extractor = Alexnet_FE(models.alexnet(pretrained=True))
 	feature_extractor.to(device)
 
+	if args.approach == "export":
+		#Loading relatedness_matrix for use in latent coordinate estimation
+		relatedness_vectors = []
+		with open(os.path.join(path, 'relatedness_matrix.txt')) as f:
+			[relatedness_vectors.append(line.strip('][\n').split(',')) for line in f]
+		f.close()	
+		#Converting string values ([['0.0']])  to floats ([[0.0]])
+		relatedness_matrix = [[float(j) for j in i] for i in relatedness_vectors]
+
+		#Make matrix of connections between autoencoders with relatedness score > 0.85 
+		n = len(relatedness_matrix)
+		ae_graph_connections = np.zeros((n, n))
+
+		# for i in range(len(relatedness_matrix)):
+		# 	ae_graph_connections.append([])
+		# 	for j in range(len(relatedness_matrix)):
+		# 		ae_graph_connections[i].append(0)
+
+		for i in range(len(relatedness_matrix)):
+			for j in range(len(relatedness_matrix[i])):
+				if j != 0 and relatedness_matrix[i][j] > 0.85:
+					ae_graph_connections[i][j-1] = 1
+					ae_graph_connections[j-1][i] = 1
+		
+		print(ae_graph_connections)
+
+		#Make clusters of autoencoders
+		clusters = find_autoencoder_clusters(ae_graph_connections)
+
+		
+				
+					
+
 	for task_number in task_number_list:
 		print("Testing task " + str(task_number))
 
@@ -123,7 +158,55 @@ def test_models(args):
 		best_loss = 99999999999
 		model_number = 0
 
-		
+		if args.approach == "export":
+			
+			#Find best cluster
+			cluster_number = []
+			for i in range(clusters):
+				print()
+				print("Cluster no. " + str(i))
+				ae_path = os.path.join(encoder_path, "autoencoder_" + str(clusters[i][0]))
+				
+				#Load a trained autoencoder model
+				model = Autoencoder()
+				model.load_state_dict(torch.load(os.path.join(ae_path, 'best_performing_model.pth')))
+
+				running_loss = 0
+				model.to(device)
+
+				#Test out the different auto encoder models and check their reconstruction error
+				for data in tqdm(dset_loaders):
+					input_data, labels = data
+
+
+
+					if (use_gpu):
+						input_data = input_data.to(device)
+					
+					else:
+						input_data  = Variable(input_data)
+					
+					#get the input to the autoencoder from the conv backbone of the Alexnet
+					input_to_ae = feature_extractor(input_data)
+					input_to_ae = input_to_ae.view(input_to_ae.size(0), -1)
+
+					input_to_ae = F.sigmoid(input_to_ae)
+				
+					#get the outputs from the model
+					preds = model(input_to_ae)
+					loss = encoder_criterion(preds, input_to_ae)
+
+					running_loss = running_loss + loss.item()
+
+				model_loss = running_loss/dset_size
+
+				if(model_loss < best_loss):
+					best_loss = model_loss
+					cluster_number = i
+
+			task_number_list = clusters[cluster_number]
+			
+
 		#Load autoencoder models for tasks 1-9; need to select the best performing autoencoder model
 		for ae_number in task_number_list:
 			print()
@@ -159,11 +242,7 @@ def test_models(args):
 				#get the outputs from the model
 				preds = model(input_to_ae)
 				loss = encoder_criterion(preds, input_to_ae)
-		
-
-
-
-
+	
 				running_loss = running_loss + loss.item()
 
 			model_loss = running_loss/dset_size
@@ -245,6 +324,129 @@ def test_models(args):
 		with open("results.txt", "a") as myfile:
 			myfile.write("\n{}: {}".format(task_number, model_accuracy*100))
 			myfile.close()
+
+def find_autoencoder_clusters(graph):
+	n = len(graph)
+	distance_matrix = np.ones((n, n))
+	#for number of paths
+	next_vertices = np.zeros((n, n))
+	prev = [[0 for i in range(n)] for j in range(n)]
+	
+	#Make distance matrix and next vertices
+	for i in range(n):
+		for j in range(n):
+			if graph[i][j] == 1:
+				distance_matrix[i][j] = 1
+			elif i == j:
+				distance_matrix[i][j] = 0
+			else:
+				distance_matrix[i][j] = np.Inf
+			next_vertices[i][j] = j
+	
+	
+	#Calculate shortest paths (Floyd-Warshall)
+	for k in range(n):
+		for i in range(n):
+			for j in range(n):
+				if distance_matrix[i][j] > (distance_matrix[i][k] + distance_matrix[k][j]):
+					distance_matrix[i][j] = (distance_matrix[i][k] + distance_matrix[k][j])
+
+	#Make adjecency dictionary for establishing the possible paths	
+	adjList = defaultdict(list)
+	for i in range(n):
+		for j in range(n):
+			if graph[i][j] != 0:
+				adjList[i].append(j)
+			
+		
+	newman_girvan(graph, adjList)
+
+
+	#Function for finding the paths to make a list of these
+	def paths(graph, v):
+		path = [v]
+		seen = {v}
+		def search():
+			dead_end = True
+			for neighbour in graph[path[-1]]:
+				if neighbour not in seen:
+					dead_end = False
+					seen.add(neighbour)
+					path.append(neighbour)
+					yield from search()
+					path.pop()
+					seen.remove(neighbour)
+			if dead_end:
+				yield list(path)
+		yield from search()
+
+
+	def calc_betas(adjList):
+		#Make a list of all possible paths in the graph	
+		all_paths = []
+		for i in range(n):
+			all_paths.append(sorted(paths(adjList, i)))
+
+		#Variables for calculating beta-values
+		num_shortest_paths = np.zeros((n, n))
+		edge_shortest_paths = np.zeros((n, n))
+		explored_paths = []
+
+		#Count the number of shortest paths connecting each node and number of shortest paths connecting nodes through each edge
+		for start in range(len(all_paths)):
+			for path in all_paths[start]:
+				explored_paths.append([])
+				for index in range(len(path)):
+					node = path[index]
+					min_distance = distance_matrix[start][node]
+					path_distance = index
+					current_path = explored_paths[-1] + [node]
+
+					if min_distance > 0 and path_distance == min_distance and current_path not in explored_paths:
+						num_shortest_paths[start][node] += 1.0
+						
+						for edge_id in range(index):
+							edge_shortest_paths[path[edge_id]][path[edge_id + 1]] += 1.0
+							edge_shortest_paths[path[edge_id + 1]][path[edge_id]] += 1.0
+					
+					explored_paths.append(current_path)
+
+		beta_matrix = np.zeros((n, n))
+		for i in range(n):
+			for j in range(n):
+				beta_matrix[i][j] = edge_shortest_paths[i][j] / num_shortest_paths[i][j]
+
+		return beta_matrix
+	
+	def get_clusters(graph):
+		clusters = [[i] for i in range(len(graph))]
+		for i in range(n):
+			for j in range(n):
+				if graph[i][j] == 1:
+					#Connect the clusters
+					cluster_i_j = np.ndarray.flatten([x for x in clusters if i in x or j in x])
+					other_clusters = [x for x in clusters if not(i in x or j in x)]
+					clusters = other_clusters.append(cluster_i_j)
+
+		return clusters
+					
+	def newman_girvan(graph, adjList):
+		clusters = [[i for i in range(len(graph))]]
+		t = 0
+	
+		while(t < sqrt(n)):
+			beta_values = calc_betas(adjList)
+			(max_i, max_j) = np.unravel_index(np.argmax(beta_values, axis=None), beta_values.shape)
+			graph[max_i][max_j] = 0
+			new_clusters = get_clusters(graph)
+			if len(new_clusters) != len(clusters):
+				t += 1
+				clusters = new_clusters
+
+		return clusters
+
+	return newman_girvan(graph, adjList)
+
 
 
 

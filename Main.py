@@ -37,8 +37,8 @@ if __name__ == "__main__":
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
 	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=5,	type=int,		help='Number of epochs you want the encoder model to train on')
-	parser.add_argument('--num_epochs_model',	default=50,	type=int,		help='Number of epochs you want  model to train on')
+	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
@@ -48,10 +48,10 @@ if __name__ == "__main__":
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
-	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
+	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
+	parser.add_argument("--use_gpu",			type=str,	default="False",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
-	parser.add_argument("--approach",			type=str,	default="expert gate",	help="Which approach to use ('expert gate' or 'consoligate')")
+	parser.add_argument("--approach",			type=str,	default="export",	help="Which approach to use ('expert gate', 'consoligate' or 'export')")
 
 	# Output options 
 	parser.add_argument("--sample_interval",	type=int,	default=5000,   help="Iters between image samples")
@@ -93,6 +93,15 @@ if __name__ == "__main__":
 		print("Downloading TIN dataset")
 		download_tin(workDir)
 
+	if opt.mode != "test":
+		#Delete relatedness_matrix if it exists
+		if os.path.exists(os.path.join(path, 'relatedness_matrix.txt')):
+			os.remove("relatedness_matrix.txt")
+
+		#Print relateness_vector for first autoencoder
+		with open(os.path.join(path, 'relatedness_matrix.txt'), 'a') as f:
+			f.write("[0]\n")
+		f.close()
 
 	# Seed
 	seed = torch.Generator().seed()
@@ -233,8 +242,6 @@ if __name__ == "__main__":
 				
 				if opt.approach == "expert gate":
 					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
-				if opt.approach == "consoligate":
-					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
-
+				
 	if opt.mode == "test" or opt.mode == "run":
 		test_models(opt)
