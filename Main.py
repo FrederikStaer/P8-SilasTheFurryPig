@@ -15,7 +15,6 @@ if __name__ == "__main__":
 	from tqdm import tqdm
 	from multiprocessing import freeze_support
 	import shutil
-	import tracemalloc
 
 	import torchvision.datasets as datasets
 	import torchvision.models as models
@@ -38,12 +37,12 @@ if __name__ == "__main__":
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
 	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_encoder', default=2,	type=int,		help='Number of epochs you want the encoder model to train on')
 	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
-	parser.add_argument("--no_of_tasks",		type=int,	default=9,		help="Number of tasks")
+	parser.add_argument("--no_of_tasks",		type=int,	default=5,		help="Number of tasks")
 	parser.add_argument("--dataset_boundaries", type=list,	default=[4,9],  help="Final task index for each dataset")
 	#parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
@@ -157,7 +156,6 @@ if __name__ == "__main__":
 			
 		# start monitoring the time and memory usage
 		trainStart = datetime.now()
-		tracemalloc.start()
 
 		#start training
 		for task_number in range(1, opt.no_of_tasks+1):
@@ -242,8 +240,6 @@ if __name__ == "__main__":
 					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 					
 
-		print("Peak memory usage in training: " + str(tracemalloc.get_traced_memory()))
-		tracemalloc.stop()
 		trainEnd = datetime.now()
 		trainTime = (trainEnd - trainStart).total_seconds()
 		print("Training time: " + "{:.0f}".format(trainTime) + " seconds")
@@ -251,7 +247,6 @@ if __name__ == "__main__":
 
 	if opt.mode == "test" or opt.mode == "run":
 		# start monitoring the memory usage and time
-		tracemalloc.start()
 		testStart = datetime.now()
 
 
@@ -261,6 +256,3 @@ if __name__ == "__main__":
 		testEnd = datetime.now()
 		testTime = (testEnd - testStart).total_seconds()
 		print("Testing time: " + "{:.0f}".format(testTime) + " seconds")
-
-		print("\n Highest memory usage in testing:" + tracemalloc.get_traced_memory())
-		tracemalloc.stop()
