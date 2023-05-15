@@ -400,33 +400,35 @@ def find_autoencoder_clusters(graph):
 
 		#Variables for calculating beta-values
 		num_shortest_paths = np.zeros((n, n))
-		edge_shortest_paths = np.zeros((n, n))
-		explored_paths = []
+		edge_shortest_paths = np.zeros((n, n, n, n)) #nodeStart, nodeEnd, edgeStart, edgeEnd
+		explored_paths = [[]]
 
 		#Count the number of shortest paths connecting each node and number of shortest paths connecting nodes through each edge
 		for start in range(len(all_paths)):
 			for path in all_paths[start]:
-				explored_paths.append([])
 				for index in range(len(path)):
 					node = path[index]
 					min_distance = distance_matrix[start][node]
 					path_distance = index
-					current_path = explored_paths[-1] + [node]
+					current_path = path[:index+1]
 
 					if min_distance > 0 and path_distance == min_distance and current_path not in explored_paths:
 						num_shortest_paths[start][node] += 1.0
 						
 						for edge_id in range(index):
-							edge_shortest_paths[path[edge_id]][path[edge_id + 1]] += 1.0
-							edge_shortest_paths[path[edge_id + 1]][path[edge_id]] += 1.0
+							edge_shortest_paths[start][node][path[edge_id]][path[edge_id + 1]] += 1.0
+							edge_shortest_paths[start][node][path[edge_id + 1]][path[edge_id]] += 1.0
 					
-					explored_paths.append(current_path)
+					if current_path not in explored_paths:
+						explored_paths.append(current_path)
 
 		beta_matrix = np.zeros((n, n))
-		for i in range(n):
-			for j in range(n):
-				if num_shortest_paths[i][j] != 0:
-					beta_matrix[i][j] = edge_shortest_paths[i][j] / num_shortest_paths[i][j]
+		for edgeStart in range(n):
+			for edgeEnd in range(n):
+				for nodeStart in range(n):
+					for nodeEnd in range(n):
+						if num_shortest_paths[nodeStart][nodeEnd] != 0:
+							beta_matrix[edgeStart][edgeEnd] += edge_shortest_paths[nodeStart][nodeEnd][edgeStart][edgeEnd] / num_shortest_paths[nodeStart][nodeEnd]
 
 		return beta_matrix
 	
@@ -450,6 +452,7 @@ def find_autoencoder_clusters(graph):
 			beta_values = calc_betas(graph)
 			(max_i, max_j) = np.unravel_index(np.argmax(beta_values, axis=None), beta_values.shape)
 			graph[max_i][max_j] = 0
+			graph[max_j][max_i] = 0
 			new_clusters = get_clusters(graph)
 			clusters = new_clusters
 
