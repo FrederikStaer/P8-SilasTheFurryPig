@@ -226,7 +226,7 @@ def test_models(args):
 
 			#check over only the specific layer identified by the AE (similar to single head setting)
 			_, preds = torch.max(outputs[:, -classes[model_number-1]:], 1)
-			fitted_outputs = torch.zeros(outputs.shape[0], classes[task_number], dtype=outputs.dtype, device=outputs.device)
+			fitted_outputs = torch.zeros(outputs.shape[0], max(classes[task_number-1], outputs.shape[1]), dtype=outputs.dtype, device=outputs.device)
 			fitted_outputs[:, -classes[model_number-1]:] = outputs[:, -classes[model_number-1]:]
 			loss = model_criterion(fitted_outputs, labels, args, flag = 'CE')
 			
