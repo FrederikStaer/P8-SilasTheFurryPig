@@ -36,9 +36,9 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	# Learning options
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
-	parser.add_argument("--batch_size",			type=int,   default=16,     help="Size of the batches")
+	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_encoder', default=2,	type=int,		help='Number of epochs you want the encoder model to train on')
 	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
+	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
 	parser.add_argument("--approach",			type=str,	default="expert gate",	help="Which approach to use ('expert gate' or 'consoligate')")
