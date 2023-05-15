@@ -154,7 +154,7 @@ if __name__ == "__main__":
 		if(os.path.exists(expert_dir)):
 			shutil.rmtree(expert_dir)
 			
-		# start monitoring the time and memory usage
+		# start monitoring the time
 		trainStart = datetime.now()
 
 		#start training
@@ -246,7 +246,7 @@ if __name__ == "__main__":
 
 
 	if opt.mode == "test" or opt.mode == "run":
-		# start monitoring the memory usage and time
+		# start monitoring the time
 		testStart = datetime.now()
 
 
