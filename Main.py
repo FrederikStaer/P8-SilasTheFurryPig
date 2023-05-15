@@ -15,7 +15,6 @@ if __name__ == "__main__":
 	from tqdm import tqdm
 	from multiprocessing import freeze_support
 	import shutil
-	import tracemalloc
 
 	import torchvision.datasets as datasets
 	import torchvision.models as models
@@ -155,9 +154,8 @@ if __name__ == "__main__":
 		if(os.path.exists(expert_dir)):
 			shutil.rmtree(expert_dir)
 
-		# start monitoring the time and memory usage
+		# start monitoring the time
 		trainStart = datetime.now()
-		tracemalloc.start()
 
 		#start training
 		for task_number in range(1, opt.no_of_tasks+1):
@@ -241,15 +239,12 @@ if __name__ == "__main__":
 				if opt.approach == "consoligate":
 					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 					
-		print("Peak memory usage in training: " + str(tracemalloc.get_traced_memory()))
-		tracemalloc.stop()
 		trainEnd = datetime.now()
 		trainTime = (trainEnd - trainStart).total_seconds()
 		print("Training time: " + "{:.0f}".format(trainTime) + " seconds")
 
 	if opt.mode == "test" or opt.mode == "run":
-		# start monitoring the memory usage and time
-		tracemalloc.start()
+		# start monitoring the time
 		testStart = datetime.now()
 
 
@@ -259,6 +254,3 @@ if __name__ == "__main__":
 		testEnd = datetime.now()
 		testTime = (testEnd - testStart).total_seconds()
 		print("Testing time: " + "{:.0f}".format(testTime) + " seconds")
-
-		print("\n Highest memory usage in testing:" + tracemalloc.get_traced_memory())
-		tracemalloc.stop()
