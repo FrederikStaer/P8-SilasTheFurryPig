@@ -15,6 +15,7 @@ if __name__ == "__main__":
 	from tqdm import tqdm
 	from multiprocessing import freeze_support
 	import shutil
+	import tracemalloc
 
 	import torchvision.datasets as datasets
 	import torchvision.models as models
