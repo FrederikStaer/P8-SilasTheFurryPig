@@ -42,13 +42,13 @@ if __name__ == "__main__":
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
 	# Dataset options
-	parser.add_argument("--no_of_tasks",		type=int,	default=5,		help="Number of tasks")
+	parser.add_argument("--no_of_tasks",		type=int,	default=3,		help="Number of tasks")
 	parser.add_argument("--dataset_boundaries", type=list,	default=[4,9],  help="Final task index for each dataset")
 	#parser.add_argument("--dataset",			type=str,	default="FB15K237",	help="Which dataset folder to use as input")
 	parser.add_argument("--download_dataset",	type=str,	default="False",	help="Whether to (re-)download dataset")
 
 	# General options
-	parser.add_argument("--mode",				type=str,	default="test",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
+	parser.add_argument("--mode",				type=str,	default="run",	help="Which thing to do, overall ('train', 'test', or 'run' which does both)")
 	parser.add_argument("--use_gpu",			type=str,	default="True",	help="Use GPU for training? (cuda)")
 	parser.add_argument("--worker_threads",     type=int,	default=4,		help="Number of threads to use for loading data")
 	parser.add_argument("--approach",			type=str,	default="export",	help="Which approach to use ('expert gate', 'consoligate' or 'export')")

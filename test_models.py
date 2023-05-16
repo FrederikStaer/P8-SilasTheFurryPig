@@ -289,7 +289,7 @@ def test_models(args):
 		
 		if(task_number in model_task_list):
 			print("\nThe correct autoencoder has been found")
-			if(args.approach == "consoligate"):
+			if(args.approach == "consoligate" or args.approach == "export"):
 				i = 0;
 				while(model_task_list[i] != task_number):
 					labels_model_offset += classes[model_task_list[i]-1]
