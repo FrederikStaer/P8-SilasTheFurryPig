@@ -103,6 +103,8 @@ def test_models(args):
 	feature_extractor = Alexnet_FE(models.alexnet(pretrained=True))
 	feature_extractor.to(device)
 
+	clusters = []
+
 	if args.approach == "export":
 		#Loading relatedness_matrix for use in latent coordinate estimation
 		relatedness_vectors = []
@@ -205,7 +207,7 @@ def test_models(args):
 					best_loss = model_loss
 					cluster_number = i
 
-			task_number_list = clusters[cluster_number]
+			ae_number_list = clusters[cluster_number]
 			
 			best_loss = 99999999999
 
@@ -272,7 +274,7 @@ def test_models(args):
 		labels_model_offset = 0
 		model_task_list = []
 
-		if(args.approach == "consoligate"):
+		if(args.approach == "consoligate" or args.approach == "export"):
 			#find tasks associated with the model
 			file_name = os.path.join(trained_model_path, "tasks.txt") 
 			file_object = open(file_name, 'r')

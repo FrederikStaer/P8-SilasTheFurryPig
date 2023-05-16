@@ -55,7 +55,7 @@ def kaiming_initilaization(layer):
 	nn.init.kaiming_normal_(layer.weight, nonlinearity='sigmoid')
 
 
-def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_criterion, use_gpu, ae_idxs):
+def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_criterion, use_gpu, ae_idxs, args):
 	""" 
 	Inputs: 
 		1) feature_extractor = A reference to the model which needs to be initialized
@@ -143,9 +143,14 @@ def get_related_model(feature_extractor, dset_loaders, dataset_size, encoder_cri
 
 
 	relatedness_matrix_file_name = os.path.join(path, 'relatedness_matrix.txt')
-	with open(relatedness_matrix_file_name, 'a') as f:
-		f.write(str(relatedness_vector) + "\n")
-	f.close()
+	if args.approach != "export":
+		with open(relatedness_matrix_file_name, 'a') as f:
+			f.write(str(relatedness_vector) + "\n")
+		f.close()
+	elif best_relatedness <= 0.85:
+		with open(relatedness_matrix_file_name, 'a') as f:
+			f.write(str(relatedness_vector) + "\n")
+		f.close()
 
 	print("The Model number is ", model_number)
 	print("The best relatedness is ", best_relatedness)

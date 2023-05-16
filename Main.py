@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	parser.add_argument("--lr",					type=float, default=0.0002, help="Learning rate")
 	parser.add_argument("--batch_size",			type=int,   default=256,     help="Size of the batches")
 	parser.add_argument("--code_dims",			type=int,   default=100,    help="Dimensionality of the latent space for autoencoders")
-	parser.add_argument('--num_epochs_encoder', default=2,	type=int,		help='Number of epochs you want the encoder model to train on')
+	parser.add_argument('--num_epochs_encoder', default=1,	type=int,		help='Number of epochs you want the encoder model to train on')
 	parser.add_argument('--num_epochs_model',	default=1,	type=int,		help='Number of epochs you want  model to train on')
 	parser.add_argument("--beta1",				type=float, default=0.5,    help="Beta1 hyperparameter for Adam optimizer")
 
@@ -240,12 +240,12 @@ if __name__ == "__main__":
 				destination = os.path.join(path, "models", "autoencoders")
 				num_ae = len(next(os.walk(destination))[1])
 				ae_idxs = list(reversed(range(1, num_ae+1)))
-				model_number, best_relatedness = get_related_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, cuda, ae_idxs)
+				model_number, best_relatedness = get_related_model(feature_extractor, dset_loaders, dset_size, encoder_criterion, cuda, ae_idxs, opt)
 				relatedness_info = (model_number, best_relatedness)
 				
 				if opt.approach == "expert gate":
 					train_model(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
-				if opt.approach == "consoligate":
+				if opt.approach == "consoligate" or opt.approach == "export":
 					train_model_consolidate(len(image_folder.classes), feature_extractor, encoder_criterion, dset_loaders, dset_size, opt.num_epochs_model, cuda, task_number, relatedness_info, opt, lr = opt.lr)
 					
 
